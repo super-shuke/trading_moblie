@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tradingMt1/component/layout/pageContent/index.dart';
 import 'package:tradingMt1/service/index.dart';
 
 class Home extends StatefulWidget {
@@ -29,78 +30,29 @@ class _MyHomePageState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Home'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: list.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    width: double.infinity,
-                    height: 100,
-                    margin: const EdgeInsets.only(bottom: 2),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    alignment: Alignment.center,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(list[index]['symbol']),
-                        Text(list[index]['markPrice']),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-
-      bottomNavigationBar: Container(
-        color: Colors.amber,
-        height: 50,
-        width: double.infinity,
-        child: Flex(
-          direction: Axis.horizontal,
-          mainAxisAlignment: MainAxisAlignment.start,
+    return PageContent(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ElevatedButton(
-              style: ButtonStyle(
-                shape: MaterialStateProperty.all(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                backgroundColor: MaterialStateProperty.all(Colors.cyanAccent),
-                overlayColor: MaterialStateProperty.all(Colors.red[300]),
-              ),
+            IconButton(
+              icon: const Icon(Icons.menu, color: Colors.white),
               onPressed: () {},
-              child: const Text(
-                'data 按钮',
-                style: TextStyle(color: Colors.white),
-              ),
+            ),
+            const Text(
+              "行情",
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit_outlined, color: Colors.white),
+              onPressed: () {},
             ),
           ],
         ),
       ),
+      body: const Text('Home Page'),
     );
   }
 }
