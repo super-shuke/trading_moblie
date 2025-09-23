@@ -12,6 +12,6 @@ class CurrencyDetails extends StatefulWidget {
 class _CurrencyDetailsState extends State<CurrencyDetails> {
   @override
   Widget build(BuildContext context) {
-    return Text('Kline Page');
+    return Text('details Page');
   }
 }
