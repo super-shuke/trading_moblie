@@ -9,16 +9,19 @@ final List<Map<String, dynamic>> routers = [
   {
     'path': '/home',
     'name': 'Home',
+    'icon': Icons.trending_up_outlined,
     'builder': (context, state) => const Home(),
   },
   {
     'path': '/kline',
     'name': 'Kline',
+    'icon': Icons.candlestick_chart_outlined,
     'builder': (context, state) => const Kline(),
   },
   {
     'path': '/settings',
     'name': 'Settings',
+    'icon': Icons.settings,
     'builder': (context, state) => const Setting(),
   },
 ];
@@ -40,5 +43,6 @@ final List<Map<String, dynamic>> routes = routers.map((route) {
     'path': route['path'],
     'name': route['name'],
     'builder': route['builder'],
+    'icon': route['icon'],
   };
 }).toList();

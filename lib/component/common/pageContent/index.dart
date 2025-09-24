@@ -20,6 +20,7 @@ class PageContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBar ?? AppBar(title: Text(pageName ?? 'Tittle')),
+      backgroundColor: Colors.white,
       body: body,
       bottomNavigationBar: bottomNavigation,
       floatingActionButton: floatingActionButton,

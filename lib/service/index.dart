@@ -17,7 +17,7 @@ class ApiService {
         ),
       );
 
-  Future<dynamic> dioGet(String url, Map<String, dynamic> params) async {
+  Future<dynamic> dioGet(String url, dynamic params) async {
     try {
       final response = await _dio.get(
         url,

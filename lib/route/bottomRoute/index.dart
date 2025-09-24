@@ -26,10 +26,18 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar> {
       body: widget.child,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
+        selectedItemColor: const Color.fromRGBO(25, 118, 210, 1),
+        unselectedIconTheme: const IconThemeData(
+          color: Color.fromRGBO(97, 97, 97, 1),
+        ),
+        selectedIconTheme: const IconThemeData(
+          color: Color.fromRGBO(25, 118, 210, 1),
+        ),
+        backgroundColor: Colors.white,
         onTap: _onTap,
         items: routes.map((route) {
           return BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(route['icon']),
             label: route['name'],
           );
         }).toList(),

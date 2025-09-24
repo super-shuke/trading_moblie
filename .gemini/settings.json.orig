@@ -1,7 +1,6 @@
 {
-  "ide": {
-    "hasSeenNudge": true
-  },
+  "theme": "GitHub",
+  "selectedAuthType": "oauth-personal",
   "mcpServers": {
     "claude-code": {
       "command": "claude",
@@ -38,12 +37,5 @@
       ]
     }
   },
-  "security": {
-    "auth": {
-      "selectedType": "oauth-personal"
-    }
-  },
-  "ui": {
-    "theme": "GitHub"
-  }
+  "hasSeenIdeIntegrationNudge": true
 }
