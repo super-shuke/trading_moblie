@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tradingMt1/views/Home.dart';
 import 'package:tradingMt1/views/Kline.dart';
 import 'package:tradingMt1/views/Setting.dart';
-import 'package:tradingMt1/views/currencyDetails.dart';
+import 'package:tradingMt1/views/secondDetails/CurrencyDetails.dart';
 import 'package:go_router/go_router.dart';
 
 final List<Map<String, dynamic>> routers = [

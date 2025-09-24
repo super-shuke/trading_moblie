@@ -10,7 +10,6 @@ class Home extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<Home> {
-  int _counter = 0;
   List list = [];
   final api = ApiService();
 
@@ -19,13 +18,6 @@ class _MyHomePageState extends State<Home> {
     setState(() {
       list = res;
     });
-  }
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-    fetchPremiumIndexes();
   }
 
   @override
