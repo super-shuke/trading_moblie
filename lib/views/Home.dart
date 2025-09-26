@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tradingMt1/component/common/List/index.dart';
 import 'package:tradingMt1/component/common/pageContent/index.dart';
 import 'package:tradingMt1/service/index.dart';
+import 'package:tradingMt1/service/socket/index.dart';
 import 'package:tradingMt1/styles/textStyle/index.dart';
 import 'package:tradingMt1/utils/format.dart';
 
@@ -16,6 +17,7 @@ class Home extends StatefulWidget {
 class _MyHomePageState extends State<Home> {
   List<Map<String, dynamic>> list = [];
   final api = ApiService();
+  final client = TrpcClient('ws://localhost:8080/');
 
   Future<void> fetchPremiumIndexes() async {
     final res = await api.dioGet("/oneDayTicker.listBySymbol", [
@@ -32,6 +34,20 @@ class _MyHomePageState extends State<Home> {
   void initState() {
     super.initState();
     fetchPremiumIndexes();
+    Future.delayed(const Duration(seconds: 1), () async {
+      final subscription = client.subscribe('subscription.connect');
+      client
+          .subscribe(
+            'subscription.requests',
+            input: {
+              'method': 'SUBSCRIBE',
+              'params': ['btcusdt@ticker'],
+            },
+          )
+          .listen((data) {
+            print('收到订阅数据: $data');
+          });
+    });
   }
 
   @override
