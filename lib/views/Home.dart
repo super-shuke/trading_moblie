@@ -1,11 +1,13 @@
-import 'package:decimal/decimal.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:tradingMt1/component/common/List/index.dart';
 import 'package:tradingMt1/component/common/pageContent/index.dart';
 import 'package:tradingMt1/service/index.dart';
 import 'package:tradingMt1/service/socket/index.dart';
 import 'package:tradingMt1/styles/textStyle/index.dart';
-import 'package:tradingMt1/utils/format.dart';
+
+import '../constans/index.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -15,18 +17,18 @@ class Home extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<Home> {
-  List<Map<String, dynamic>> list = [];
+  List<Map<String, dynamic>> priceList = [];
   final api = ApiService();
   final client = TrpcClient('ws://localhost:8080/');
-
+  // final pingClient = TrpcClient('ws://localhost:8081/');
   Future<void> fetchPremiumIndexes() async {
     final res = await api.dioGet("/oneDayTicker.listBySymbol", [
       'BTCUSDT',
       'ETHUSDT',
     ]);
     setState(() {
-      list = List<Map<String, dynamic>>.from(res);
-      print(list);
+      priceList = List<Map<String, dynamic>>.from(res);
+      print(priceList);
     });
   }
 
@@ -34,19 +36,50 @@ class _MyHomePageState extends State<Home> {
   void initState() {
     super.initState();
     fetchPremiumIndexes();
-    Future.delayed(const Duration(seconds: 1), () async {
-      final subscription = client.subscribe('subscription.connect');
-      client
-          .subscribe(
-            'subscription.requests',
-            input: {
-              'method': 'SUBSCRIBE',
-              'params': ['btcusdt@ticker'],
-            },
-          )
-          .listen((data) {
-            print('收到订阅数据: $data');
-          });
+    // pingClient.connectionStateStream.listen((state) {
+    //   print('Ping 连接状态变化: $state');
+    //   if (state == TrpcConnectionState.connected) {
+    //     pingClient.startHeartbeat(interval: Duration(seconds: 10));
+    //   }
+    // });
+
+    // 连接 tRPC
+
+    client.connectionStateStream.listen((state) {
+      print('tRPC 连接状态: $state');
+      if (state == TrpcConnectionState.connected) {
+        client.subscribe('subscription.connect').listen((data) {
+          print('connect 结果: $data.json');
+          // 只在连接成功时订阅一次
+          if (data['json'] == '1') {
+            client
+                .subscribe(
+                  'subscription.requests',
+                  input: {
+                    'method': 'SUBSCRIBE',
+                    'params': ['btcusdt@ticker'],
+                  },
+                )
+                .listen((data) {
+                  final result = data['json'];
+                  setState(() {
+                    final mappedTicker = mapThirdPartyTicker(result);
+                    final symbol = mappedTicker['symbol'];
+                    print('symbol: $symbol');
+                    print('mappedTicker: $mappedTicker');
+                    final index = priceList.indexWhere(
+                      (item) => item['symbol'] == symbol,
+                    );
+                    if (index != -1) {
+                      priceList[index] = mappedTicker;
+                    } else {
+                      priceList.add(mappedTicker);
+                    }
+                  });
+                });
+          }
+        });
+      }
     });
   }
 
@@ -60,7 +93,7 @@ class _MyHomePageState extends State<Home> {
           child: _homeWidget(),
         ),
       ),
-      body: _listWidget(list),
+      body: _listWidget(priceList),
     );
   }
 
@@ -132,11 +165,7 @@ class _MyHomePageState extends State<Home> {
                             ),
                             const SizedBox(width: 5),
                             Text(
-                              FormatUtils.formatCount(
-                                item['priceChangePercent'],
-                                decimals: 2,
-                                ratio: true,
-                              ),
+                              item['priceChangePercent'],
                               style: CommonTextStyle.price,
                             ),
                           ],
@@ -154,7 +183,7 @@ class _MyHomePageState extends State<Home> {
                                   style: CommonTextStyle.normal,
                                 ),
                                 Text(
-                                  FormatUtils.formatTimestamp(item['openTime']),
+                                  item['openTime'],
                                   style: CommonTextStyle.captionBold,
                                 ),
                               ],
@@ -167,7 +196,7 @@ class _MyHomePageState extends State<Home> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      item['lastPrice'],
+                                      item['buy'] ?? item['lastPrice'],
                                       style: CommonTextStyle.normal,
                                     ),
                                     Text(
@@ -182,7 +211,7 @@ class _MyHomePageState extends State<Home> {
 
                                   children: [
                                     Text(
-                                      item['lastPrice'],
+                                      item['sell'] ?? item['lastPrice'],
                                       style: CommonTextStyle.normal,
                                     ),
                                     Text(
