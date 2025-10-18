@@ -57,7 +57,8 @@ class _MyHomePageState extends State<Home> {
                   'subscription.requests',
                   input: {
                     'method': 'SUBSCRIBE',
-                    'params': ['btcusdt@ticker'],
+                    'params': ['btcusdt@bookTicker'],
+                    'subType':'bookTicker'
                   },
                 )
                 .listen((data) {
