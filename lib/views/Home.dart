@@ -36,20 +36,12 @@ class _MyHomePageState extends State<Home> {
   void initState() {
     super.initState();
     fetchPremiumIndexes();
-    // pingClient.connectionStateStream.listen((state) {
-    //   print('Ping 连接状态变化: $state');
-    //   if (state == TrpcConnectionState.connected) {
-    //     pingClient.startHeartbeat(interval: Duration(seconds: 10));
-    //   }
-    // });
-
     // 连接 tRPC
-
     client.connectionStateStream.listen((state) {
       print('tRPC 连接状态: $state');
       if (state == TrpcConnectionState.connected) {
         client.subscribe('subscription.connect').listen((data) {
-          print('connect 结果: $data.json');
+          print('connect 结果: $data');
           // 只在连接成功时订阅一次
           if (data['json'] == '1') {
             client
@@ -57,7 +49,7 @@ class _MyHomePageState extends State<Home> {
                   'subscription.requests',
                   input: {
                     'method': 'SUBSCRIBE',
-                    'params': ['btcusdt@bookTicker'],
+                    'params': ['btcusdt@ticker'],
                     'subType':'bookTicker'
                   },
                 )
