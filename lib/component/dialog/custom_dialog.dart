@@ -115,12 +115,17 @@ class _CustomDialogState extends State<CustomDialog>
               // 遮罩层
               if (widget.config.showMask)
                 Positioned.fill(
-                  child: GestureDetector(
-                    onTap: _handleClose,
-                    child: Opacity(
-                      opacity: _opacityAnimation.value,
-                      child: Container(
-                        color: widget.config.maskColor,
+                  child: Semantics(
+                    label: '关闭弹窗',
+                    button: true,
+                    onTap: widget.config.dismissible ? _handleClose : null,
+                    child: GestureDetector(
+                      onTap: _handleClose,
+                      child: Opacity(
+                        opacity: _opacityAnimation.value,
+                        child: Container(
+                          color: widget.config.maskColor,
+                        ),
                       ),
                     ),
                   ),
