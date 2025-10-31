@@ -210,6 +210,17 @@ CustomDialog(
 )
 ```
 
+### 底部滑动动画
+
+```dart
+CustomDialog(
+  config: CustomDialogConfig(
+    animationType: DialogAnimationType.slideFromBottom,
+  ),
+  // ...
+)
+```
+
 ---
 
 ## 🎯 查看完整示例

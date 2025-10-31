@@ -14,12 +14,15 @@ class _DialogDemoState extends State<DialogDemo> {
       CustomDialogController();
   final CustomDialogController _noMaskDialogController =
       CustomDialogController();
+  final CustomDialogController _slideDialogController =
+      CustomDialogController();
 
   @override
   void dispose() {
     _dialogController.dispose();
     _customColorDialogController.dispose();
     _noMaskDialogController.dispose();
+    _slideDialogController.dispose();
     super.dispose();
   }
 
@@ -50,6 +53,11 @@ class _DialogDemoState extends State<DialogDemo> {
                 ElevatedButton(
                   onPressed: () => _noMaskDialogController.show(),
                   child: const Text('显示无遮罩弹窗'),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => _slideDialogController.show(),
+                  child: const Text('显示底部滑动弹窗'),
                 ),
               ],
             ),
@@ -173,6 +181,75 @@ class _DialogDemoState extends State<DialogDemo> {
                       ElevatedButton(
                         onPressed: () => _noMaskDialogController.hide(),
                         child: const Text('关闭'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          // 底部滑动弹窗
+          ListenableBuilder(
+            listenable: _slideDialogController,
+            builder: (context, child) {
+              return CustomDialog(
+                isVisible: _slideDialogController.isVisible,
+                config: const CustomDialogConfig(
+                  showMask: true,
+                  animationType: DialogAnimationType.slideFromBottom, // 从底部滑动
+                ),
+                onClose: () => _slideDialogController.hide(),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(24),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        '底部滑动弹窗',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        '这个弹窗从底部向上滑动显示，常用于操作菜单、选择器等场景。',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 30),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => _slideDialogController.hide(),
+                              child: const Text('取消'),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => _slideDialogController.hide(),
+                              child: const Text('确定'),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

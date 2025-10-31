@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 
+/// 弹窗动画类型
+enum DialogAnimationType {
+  /// 中间淡入淡出 + 缩放
+  fade,
+  
+  /// 从底部向上滑动
+  slideFromBottom,
+}
+
 /// 自定义弹窗配置类
 class CustomDialogConfig {
   /// 是否显示遮罩
@@ -14,11 +23,15 @@ class CustomDialogConfig {
   /// 弹窗动画时长
   final Duration animationDuration;
 
+  /// 弹窗动画类型
+  final DialogAnimationType animationType;
+
   const CustomDialogConfig({
     this.showMask = true,
     this.maskColor = const Color(0x80000000), // 默认半透明黑色
     this.dismissible = true,
     this.animationDuration = const Duration(milliseconds: 300),
+    this.animationType = DialogAnimationType.fade, // 默认淡入淡出
   });
 }
 
@@ -53,6 +66,7 @@ class _CustomDialogState extends State<CustomDialog>
   late AnimationController _controller;
   late Animation<double> _opacityAnimation;
   late Animation<double> _scaleAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -68,6 +82,13 @@ class _CustomDialogState extends State<CustomDialog>
 
     _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 1.0), // 从底部开始
+      end: Offset.zero, // 到原位置
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
     );
 
     if (widget.isVisible) {
@@ -130,21 +151,40 @@ class _CustomDialogState extends State<CustomDialog>
                     ),
                   ),
                 ),
-              // 弹窗内容
-              Center(
-                child: Opacity(
-                  opacity: _opacityAnimation.value,
-                  child: Transform.scale(
-                    scale: _scaleAnimation.value,
-                    child: widget.child,
-                  ),
-                ),
-              ),
+              // 弹窗内容 - 根据动画类型选择不同的显示方式
+              _buildDialogContent(),
             ],
           ),
         );
       },
     );
+  }
+
+  /// 根据动画类型构建弹窗内容
+  Widget _buildDialogContent() {
+    switch (widget.config.animationType) {
+      case DialogAnimationType.fade:
+        // 中间淡入淡出 + 缩放
+        return Center(
+          child: Opacity(
+            opacity: _opacityAnimation.value,
+            child: Transform.scale(
+              scale: _scaleAnimation.value,
+              child: widget.child,
+            ),
+          ),
+        );
+      
+      case DialogAnimationType.slideFromBottom:
+        // 从底部向上滑动
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: widget.child,
+          ),
+        );
+    }
   }
 }
 

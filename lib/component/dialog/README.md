@@ -8,7 +8,7 @@
 - ✅ **颜色自定义**：可自定义遮罩颜色
 - ✅ **外部控制**：通过 Controller 控制弹窗显示/隐藏
 - ✅ **自定义内容**：支持任意 Widget 作为弹窗内容
-- ✅ **动画效果**：内置淡入淡出和缩放动画
+- ✅ **多种动画效果**：支持中间淡入淡出和底部滑动两种动画
 - ✅ **可关闭配置**：可配置点击遮罩是否关闭弹窗
 
 ## 快速开始
@@ -119,6 +119,19 @@ CustomDialog(
 )
 ```
 
+### 底部滑动动画
+
+```dart
+CustomDialog(
+  isVisible: _controller.isVisible,
+  config: CustomDialogConfig(
+    animationType: DialogAnimationType.slideFromBottom, // 从底部滑动
+  ),
+  onClose: () => _controller.hide(),
+  child: YourCustomWidget(),
+)
+```
+
 ## API 文档
 
 ### CustomDialog
@@ -142,6 +155,16 @@ CustomDialog(
 | maskColor | Color | Color(0x80000000) | 遮罩颜色（半透明黑色） |
 | dismissible | bool | true | 是否可以点击遮罩关闭 |
 | animationDuration | Duration | Duration(milliseconds: 300) | 动画时长 |
+| animationType | DialogAnimationType | DialogAnimationType.fade | 动画类型 |
+
+### DialogAnimationType
+
+弹窗动画类型枚举。
+
+| 值 | 说明 |
+|----|------|
+| fade | 中间淡入淡出 + 缩放动画 |
+| slideFromBottom | 从底部向上滑动 |
 
 ### CustomDialogController
 
