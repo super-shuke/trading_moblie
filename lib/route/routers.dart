@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tradingMt1/views/Home.dart';
 import 'package:tradingMt1/views/Kline.dart';
 import 'package:tradingMt1/views/Setting.dart';
+import 'package:tradingMt1/views/DialogDemo.dart';
 import 'package:tradingMt1/views/secondDetails/CurrencyDetails.dart';
 import 'package:go_router/go_router.dart';
 
@@ -20,6 +21,11 @@ final List<Map<String, dynamic>> routers = [
     'path': '/settings',
     'name': 'Settings',
     'builder': (context, state) => const Setting(),
+  },
+  {
+    'path': '/dialog-demo',
+    'name': 'DialogDemo',
+    'builder': (context, state) => const DialogDemo(),
   },
 ];
 
