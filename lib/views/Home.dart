@@ -37,43 +37,43 @@ class _MyHomePageState extends State<Home> {
     super.initState();
     fetchPremiumIndexes();
     // 连接 tRPC
-    client.connectionStateStream.listen((state) {
-      print('tRPC 连接状态: $state');
-      if (state == TrpcConnectionState.connected) {
-        client.subscribe('subscription.connect').listen((data) {
-          print('connect 结果: $data');
-          // 只在连接成功时订阅一次
-          if (data['json'] == '1') {
-            client
-                .subscribe(
-                  'subscription.requests',
-                  input: {
-                    'method': 'SUBSCRIBE',
-                    'params': ['btcusdt@ticker'],
-                    'subType':'bookTicker'
-                  },
-                )
-                .listen((data) {
-                  final result = data['json'];
-                  setState(() {
-                    final mappedTicker = mapThirdPartyTicker(result);
-                    final symbol = mappedTicker['symbol'];
-                    print('symbol: $symbol');
-                    print('mappedTicker: $mappedTicker');
-                    final index = priceList.indexWhere(
-                      (item) => item['symbol'] == symbol,
-                    );
-                    if (index != -1) {
-                      priceList[index] = mappedTicker;
-                    } else {
-                      priceList.add(mappedTicker);
-                    }
-                  });
-                });
-          }
-        });
-      }
-    });
+    // client.connectionStateStream.listen((state) {
+    //   print('tRPC 连接状态: $state');
+    //   if (state == TrpcConnectionState.connected) {
+    //     client.subscribe('subscription.connect').listen((data) {
+    //       print('connect 结果: $data');
+    //       // 只在连接成功时订阅一次
+    //       if (data['json'] == '1') {
+    //         client
+    //             .subscribe(
+    //               'subscription.requests',
+    //               input: {
+    //                 'method': 'SUBSCRIBE',
+    //                 'params': ['btcusdt@ticker'],
+    //                 'subType':'bookTicker'
+    //               },
+    //             )
+    //             .listen((data) {
+    //               final result = data['json'];
+    //               setState(() {
+    //                 final mappedTicker = mapThirdPartyTicker(result);
+    //                 final symbol = mappedTicker['symbol'];
+    //                 print('symbol: $symbol');
+    //                 print('mappedTicker: $mappedTicker');
+    //                 final index = priceList.indexWhere(
+    //                   (item) => item['symbol'] == symbol,
+    //                 );
+    //                 if (index != -1) {
+    //                   priceList[index] = mappedTicker;
+    //                 } else {
+    //                   priceList.add(mappedTicker);
+    //                 }
+    //               });
+    //             });
+    //       }
+    //     });
+    //   }
+    // });
   }
 
   @override
