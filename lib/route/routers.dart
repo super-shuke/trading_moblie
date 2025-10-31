@@ -3,6 +3,9 @@ import 'package:tradingMt1/views/Home.dart';
 import 'package:tradingMt1/views/Kline.dart';
 import 'package:tradingMt1/views/Setting.dart';
 import 'package:tradingMt1/views/DialogDemo.dart';
+import 'package:tradingMt1/views/SimpleDialogExample.dart';
+import 'package:tradingMt1/views/TradingConfirmExample.dart';
+import 'package:tradingMt1/views/DialogExamplesHub.dart';
 import 'package:tradingMt1/views/secondDetails/CurrencyDetails.dart';
 import 'package:go_router/go_router.dart';
 
@@ -23,9 +26,24 @@ final List<Map<String, dynamic>> routers = [
     'builder': (context, state) => const Setting(),
   },
   {
+    'path': '/examples-hub',
+    'name': 'ExamplesHub',
+    'builder': (context, state) => const DialogExamplesHub(),
+  },
+  {
     'path': '/dialog-demo',
     'name': 'DialogDemo',
     'builder': (context, state) => const DialogDemo(),
+  },
+  {
+    'path': '/simple-dialog',
+    'name': 'SimpleDialog',
+    'builder': (context, state) => const SimpleDialogExample(),
+  },
+  {
+    'path': '/trading-confirm',
+    'name': 'TradingConfirm',
+    'builder': (context, state) => const TradingConfirmExample(),
   },
 ];
 
