@@ -1,0 +1,10 @@
+{
+  "@@locale": "en",
+  "appTitle": "tradingMt1",
+  "homeTitle": "Market",
+  "klineTitle": "K-Line",
+  "currency": "Currency",
+  "noData": "No data",
+  "changeTheme":"change Theme"
+
+}

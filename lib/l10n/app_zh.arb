@@ -1,0 +1,9 @@
+{
+  "@@locale": "zh",
+  "appTitle": "tradingMt1",
+  "homeTitle": "行情",
+  "klineTitle": "K线图",
+  "currency": "币种",
+  "noData": "暂无数据",
+  "changeTheme":"修改主题"
+}

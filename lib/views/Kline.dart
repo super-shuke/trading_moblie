@@ -2,6 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:candlesticks/candlesticks.dart';
 import 'package:tradingMt1/component/common/pageContent/index.dart';
+import 'package:tradingMt1/l10n/app_localizations.dart';
+import 'package:tradingMt1/styles/theme/app_common.dart';
+import 'package:tradingMt1/styles/buttonStyle/index.dart';
 
 class Kline extends StatefulWidget {
   const Kline({super.key});
@@ -12,7 +15,6 @@ class Kline extends StatefulWidget {
 
 class _KlineState extends State<Kline> {
   List<Candle> candles = [];
-  bool themeIsDark = false;
 
   String klineMode = '1h';
 
@@ -45,51 +47,39 @@ class _KlineState extends State<Kline> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        splashFactory: NoSplash.splashFactory,
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        hoverColor: Colors.transparent,
-        focusColor: Colors.transparent,
-        // For Buttons and IconButtons
-        colorScheme: (themeIsDark ? ThemeData.dark() : ThemeData.light())
-            .colorScheme
-            .copyWith(),
-      ),
-      debugShowCheckedModeBanner: false,
-
-      home: PageContent(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            child: _klineHeader(klineMode),
-          ),
+    return PageContent(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          child: _klineHeader(context, klineMode),
         ),
-        body: Center(
-          child: Candlesticks(
-            candles: candles,
-            actions: [
-              ToolBarAction(
-                width: 80,
-                onPressed: () {
-                  // Add your action here
-                },
-                child: const Text(
-                  'currency',
-                  style: TextStyle(fontSize: 16, color: Colors.blue),
+      ),
+      body: Center(
+        child: Candlesticks(
+          candles: candles,
+          actions: [
+            ToolBarAction(
+              width: 80,
+              onPressed: () {
+                // Add your action here
+              },
+              child: Text(
+                AppLocalizations.of(context)!.currency,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-Widget _klineHeader(String klineMode) {
+Widget _klineHeader(BuildContext context, String klineMode) {
+  final tokens = Theme.of(context).extension<AppCommon>()!;
   return Container(
     width: double.infinity,
     height: 60,
@@ -97,31 +87,25 @@ Widget _klineHeader(String klineMode) {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         TextButton(
-          style: TextButton.styleFrom(padding: EdgeInsets.zero),
+          style: CommonButtonStyle.textBtn(
+            context,
+          ).copyWith(padding: MaterialStateProperty.all(EdgeInsets.zero)),
           onPressed: () {
             print('点击了 $klineMode');
           },
           child: Text(
             klineMode,
-            style: TextStyle(
-              fontSize: 14,
-              color: const Color.fromARGB(255, 99, 99, 99),
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: tokens.textSecondary),
           ),
         ),
-        const Text(
-          "K线图",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
+        Text(
+          AppLocalizations.of(context)!.klineTitle,
+          style: Theme.of(context).textTheme.titleLarge,
         ),
         IconButton(
-          icon: const Icon(
-            Icons.edit_outlined,
-            color: Color.fromRGBO(97, 97, 97, 1),
-          ),
+          icon: Icon(Icons.edit_outlined, color: tokens.textSecondary),
           onPressed: () {},
         ),
       ],

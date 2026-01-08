@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:tradingMt1/component/common/List/index.dart';
 import 'package:tradingMt1/component/common/pageContent/index.dart';
-import 'package:tradingMt1/service/index.dart';
-import 'package:tradingMt1/service/socket/index.dart';
+import 'package:tradingMt1/l10n/app_localizations.dart';
 import 'package:tradingMt1/styles/textStyle/index.dart';
-
-import '../constans/index.dart';
+import 'package:tradingMt1/styles/theme/app_button.dart';
+import 'package:tradingMt1/styles/theme/app_common.dart';
+import 'package:tradingMt1/store/common/common_store.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -18,100 +18,67 @@ class Home extends StatefulWidget {
 
 class _MyHomePageState extends State<Home> {
   List<Map<String, dynamic>> priceList = [];
-  final api = ApiService();
-  final client = TrpcClient('ws://localhost:8080/');
-  // final pingClient = TrpcClient('ws://localhost:8081/');
-  Future<void> fetchPremiumIndexes() async {
-    final res = await api.dioGet("/oneDayTicker.listBySymbol", [
-      'BTCUSDT',
-      'ETHUSDT',
-    ]);
-    setState(() {
-      priceList = List<Map<String, dynamic>>.from(res);
-      print(priceList);
-    });
-  }
 
   @override
   void initState() {
     super.initState();
-    fetchPremiumIndexes();
-    // 连接 tRPC
-    // client.connectionStateStream.listen((state) {
-    //   print('tRPC 连接状态: $state');
-    //   if (state == TrpcConnectionState.connected) {
-    //     client.subscribe('subscription.connect').listen((data) {
-    //       print('connect 结果: $data');
-    //       // 只在连接成功时订阅一次
-    //       if (data['json'] == '1') {
-    //         client
-    //             .subscribe(
-    //               'subscription.requests',
-    //               input: {
-    //                 'method': 'SUBSCRIBE',
-    //                 'params': ['btcusdt@ticker'],
-    //                 'subType':'bookTicker'
-    //               },
-    //             )
-    //             .listen((data) {
-    //               final result = data['json'];
-    //               setState(() {
-    //                 final mappedTicker = mapThirdPartyTicker(result);
-    //                 final symbol = mappedTicker['symbol'];
-    //                 print('symbol: $symbol');
-    //                 print('mappedTicker: $mappedTicker');
-    //                 final index = priceList.indexWhere(
-    //                   (item) => item['symbol'] == symbol,
-    //                 );
-    //                 if (index != -1) {
-    //                   priceList[index] = mappedTicker;
-    //                 } else {
-    //                   priceList.add(mappedTicker);
-    //                 }
-    //               });
-    //             });
-    //       }
-    //     });
-    //   }
-    // });
   }
 
   @override
   Widget build(BuildContext context) {
+    final content = Theme.of(context);
+    final buttonStyles = content.extension<AppButtonStyles>();
+    final textCommon = AppLocalizations.of(context);
+    final commonStore = CommonStoreScope.of(context);
+
     return PageContent(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          child: _homeWidget(),
+          child: _homeWidget(context),
         ),
       ),
-      body: _listWidget(priceList),
+
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        child: Column(
+          children: [
+            ElevatedButton(
+              style: buttonStyles!.elevated,
+              onPressed: () {
+                print('点击了刷新按钮');
+                commonStore.toggleLightDark();
+              },
+              child: Text(
+                textCommon!.changeTheme,
+                style: content.textTheme.labelMedium,
+              ),
+            ),
+            Expanded(child: _listWidget(priceList)),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _homeWidget() {
+  Widget _homeWidget(BuildContext context) {
+    final tokens = Theme.of(context).extension<AppCommon>()!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         IconButton(
-          icon: const Icon(Icons.menu, color: Color.fromRGBO(97, 97, 97, 1)),
+          icon: Icon(Icons.menu, color: tokens.textSecondary),
           onPressed: () {},
         ),
-        const Text(
-          "行情",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
+        Text(
+          AppLocalizations.of(context)!.homeTitle,
+          style: Theme.of(context).textTheme.titleMedium,
         ),
         IconButton(
-          icon: const Icon(
-            Icons.edit_outlined,
-            color: Color.fromRGBO(97, 97, 97, 1),
-          ),
+          icon: Icon(Icons.edit_outlined, color: tokens.textSecondary),
           onPressed: () {},
         ),
       ],
@@ -136,8 +103,8 @@ class _MyHomePageState extends State<Home> {
                     // 处理点击事件
                     print('点击了 ${item['symbol']}');
                   },
-                  splashColor: const Color.fromRGBO(214, 214, 214, .5),
-                  highlightColor: Colors.grey.withOpacity(0.1),
+                  splashColor: Theme.of(context).splashColor,
+                  highlightColor: Theme.of(context).highlightColor,
 
                   child: Container(
                     width: double.infinity,
@@ -154,12 +121,12 @@ class _MyHomePageState extends State<Home> {
                           children: [
                             Text(
                               item['priceChange'].toString(),
-                              style: CommonTextStyle.captionBold,
+                              style: CommonTextStyle.captionBold(context),
                             ),
                             const SizedBox(width: 5),
                             Text(
                               item['priceChangePercent'],
-                              style: CommonTextStyle.price,
+                              style: CommonTextStyle.price(context),
                             ),
                           ],
                         ),
@@ -173,11 +140,11 @@ class _MyHomePageState extends State<Home> {
                               children: [
                                 Text(
                                   item['symbol'].toString(),
-                                  style: CommonTextStyle.normal,
+                                  style: CommonTextStyle.normal(context),
                                 ),
                                 Text(
                                   item['openTime'],
-                                  style: CommonTextStyle.captionBold,
+                                  style: CommonTextStyle.captionBold(context),
                                 ),
                               ],
                             ),
@@ -190,11 +157,13 @@ class _MyHomePageState extends State<Home> {
                                   children: [
                                     Text(
                                       item['buy'] ?? item['lastPrice'],
-                                      style: CommonTextStyle.normal,
+                                      style: CommonTextStyle.normal(context),
                                     ),
                                     Text(
                                       'L: ${item['lowPrice']}',
-                                      style: CommonTextStyle.captionBold,
+                                      style: CommonTextStyle.captionBold(
+                                        context,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -205,11 +174,13 @@ class _MyHomePageState extends State<Home> {
                                   children: [
                                     Text(
                                       item['sell'] ?? item['lastPrice'],
-                                      style: CommonTextStyle.normal,
+                                      style: CommonTextStyle.normal(context),
                                     ),
                                     Text(
                                       'H: ${item['highPrice']}',
-                                      style: CommonTextStyle.captionBold,
+                                      style: CommonTextStyle.captionBold(
+                                        context,
+                                      ),
                                     ),
                                   ],
                                 ),
