@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tradingMt1/styles/theme/app_text.dart';
-import 'package:tradingMt1/styles/theme/app_common.dart';
-import 'package:tradingMt1/styles/theme/app_button.dart';
+import 'package:traveling_app/styles/theme/app_text.dart';
+import 'package:traveling_app/styles/theme/app_common.dart';
+import 'package:traveling_app/styles/theme/app_button.dart';
 
 class AppTheme {
   AppTheme._();
@@ -21,18 +21,13 @@ class AppTheme {
   }
 
   static ThemeData _buildTheme(AppCommon themes, Brightness brightness) {
-    final colorScheme = ColorScheme(
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: themes.brand,
       brightness: brightness,
       primary: themes.brand,
-      onPrimary: brightness == Brightness.dark ? Colors.black : Colors.white,
-      secondary: themes.brand,
-      onSecondary: brightness == Brightness.dark ? Colors.black : Colors.white,
+      secondary: themes.accentAlt,
       error: themes.priceDown,
-      onError: brightness == Brightness.dark ? Colors.black : Colors.white,
-      background: themes.background,
-      onBackground: themes.textPrimary,
       surface: themes.surface,
-      onSurface: themes.textPrimary,
     );
 
     final buttons = buildAppButtonTheme(themes);
@@ -51,7 +46,7 @@ class AppTheme {
       textButtonTheme: buttons.text,
       outlinedButtonTheme: buttons.outlined,
       appBarTheme: AppBarTheme(
-        backgroundColor: themes.surface,
+        backgroundColor: themes.background,
         foregroundColor: themes.textPrimary,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -64,8 +59,8 @@ class AppTheme {
         iconColor: themes.textSecondary,
         textColor: themes.textPrimary,
       ),
-      splashColor: colorScheme.primary.withOpacity(0.08),
-      highlightColor: colorScheme.primary.withOpacity(0.06),
+      splashColor: colorScheme.primary.withValues(alpha: 0.08),
+      highlightColor: colorScheme.primary.withValues(alpha: 0.06),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: themes.surface,
         selectedItemColor: colorScheme.primary,

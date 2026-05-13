@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tradingMt1/styles/theme/app_common.dart';
+import 'package:traveling_app/styles/theme/app_common.dart';
 
 class CommonTextStyle {
   CommonTextStyle._();

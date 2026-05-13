@@ -26,7 +26,7 @@ dependencies:
 ## 基础用法
 
 ```dart
-import 'package:tradingMt1/component/common/List/index.dart';
+import 'package:traveling_app/component/common/List/index.dart';
 
 CustomList(
   dataList: [

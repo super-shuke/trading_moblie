@@ -5,13 +5,18 @@ import 'package:flutter/material.dart';
 class AppCommon extends ThemeExtension<AppCommon> {
   final Color background;
   final Color surface;
+  final Color surfaceElevated;
   final Color textPrimary;
   final Color btnBackgroundPrimary;
   final Color btnTextPrimary;
+  final Color textPrimarySameBtn;
   final Color textSecondary;
   final Color textMuted;
   final Color border;
   final Color brand;
+  final Color borderDefault;
+  final Color accentAlt;
+  final Color amber;
   final Color priceUp;
   final Color priceDown;
 
@@ -30,14 +35,18 @@ class AppCommon extends ThemeExtension<AppCommon> {
   const AppCommon({
     required this.background,
     required this.surface,
+    required this.surfaceElevated,
     required this.textPrimary,
     required this.btnBackgroundPrimary,
     required this.btnTextPrimary,
-
+    required this.textPrimarySameBtn,
     required this.textSecondary,
     required this.textMuted,
     required this.border,
     required this.brand,
+    required this.borderDefault,
+    required this.accentAlt,
+    required this.amber,
     required this.priceUp,
     required this.priceDown,
     required this.radiusSm,
@@ -54,20 +63,25 @@ class AppCommon extends ThemeExtension<AppCommon> {
 
   factory AppCommon.light() {
     return const AppCommon(
-      background: Color(0xFFF6F7F9),
-      surface: Color(0xFFFFFFFF),
-      textPrimary: Color(0xFF111111),
-      btnBackgroundPrimary: Color(0xFF1976D2),
-      btnTextPrimary: Color(0xFFFFFFFF),
-      textSecondary: Color(0xFF616161),
-      textMuted: Color(0xFF8A8A8A),
-      border: Color(0xFFE0E0E0),
-      brand: Color(0xFF1976D2),
-      priceUp: Color(0xFF1E88E5),
-      priceDown: Color(0xFFD32F2F),
-      radiusSm: 4,
-      radiusMd: 8,
-      radiusLg: 12,
+      background: Color(0xFFF7F1E7),
+      surface: Color(0xFFFFFCF7),
+      surfaceElevated: Color(0xFFF0E8DB),
+      textPrimary: Color(0xFF1F241E),
+      btnBackgroundPrimary: Color(0xFF7dd87d),
+      btnTextPrimary: Color(0xFFF7F1E7),
+      textSecondary: Color(0xFF485344),
+      textMuted: Color(0xFF7B8276),
+      textPrimarySameBtn: Color(0xFF7dd87d),
+      border: Color(0xFFD8D0C0),
+      borderDefault: Color(0xFFE8EFE6),
+      brand: Color(0xFFe8efe6),
+      accentAlt: Color(0xFFD9784A),
+      amber: Color(0xFFE0A93B),
+      priceUp: Color(0xFF7dd87d),
+      priceDown: Color(0xFFC35642),
+      radiusSm: 6,
+      radiusMd: 10,
+      radiusLg: 16,
       space2: 2,
       space4: 4,
       space8: 8,
@@ -80,20 +94,26 @@ class AppCommon extends ThemeExtension<AppCommon> {
 
   factory AppCommon.dark() {
     return const AppCommon(
-      background: Color(0xFF0F1115),
-      surface: Color(0xFF161A22),
-      textPrimary: Color(0xFFF5F5F5),
-      textSecondary: Color(0xFFB0B0B0),
-      btnBackgroundPrimary: Color(0xFF90CAF9),
-      btnTextPrimary: Color(0xFF000000),
-      textMuted: Color(0xFF8A8A8A),
-      border: Color(0xFF2A2F3A),
-      brand: Color(0xFF90CAF9),
-      priceUp: Color(0xFF64B5F6),
-      priceDown: Color(0xFFEF5350),
-      radiusSm: 4,
-      radiusMd: 8,
-      radiusLg: 12,
+      background: Color(0xFF0D1410),
+      surface: Color(0xFF152019),
+      surfaceElevated: Color(0xFF1B2922),
+      textPrimary: Color(0xFFEEE5D6),
+      btnBackgroundPrimary: Color(0xFF7dd87d),
+      btnTextPrimary: Color(0xFF0D1410),
+      textPrimarySameBtn: Color(0xFF7dd87d),
+      textSecondary: Color(0xFFB3BBAF),
+      textMuted: Color(0xFF8A9485),
+      border: Color(0xFF2A3A30),
+      borderDefault: Color(0xFFE8EFE6),
+
+      brand: Color(0xFFe8efe6),
+      accentAlt: Color(0xFFD9784A),
+      amber: Color(0xFFE9B84A),
+      priceUp: Color(0xFF7dd87d),
+      priceDown: Color(0xFFD9544A),
+      radiusSm: 6,
+      radiusMd: 10,
+      radiusLg: 16,
       space2: 2,
       space4: 4,
       space8: 8,
@@ -108,14 +128,18 @@ class AppCommon extends ThemeExtension<AppCommon> {
   AppCommon copyWith({
     Color? background,
     Color? surface,
+    Color? surfaceElevated,
     Color? textPrimary,
     Color? btnBackgroundPrimary,
     Color? btnTextPrimary,
-
+    Color? textPrimarySameBtn,
     Color? textSecondary,
     Color? textMuted,
     Color? border,
     Color? brand,
+    Color? borderDefault,
+    Color? accentAlt,
+    Color? amber,
     Color? priceUp,
     Color? priceDown,
     double? radiusSm,
@@ -132,13 +156,18 @@ class AppCommon extends ThemeExtension<AppCommon> {
     return AppCommon(
       background: background ?? this.background,
       surface: surface ?? this.surface,
+      surfaceElevated: surfaceElevated ?? this.surfaceElevated,
       textPrimary: textPrimary ?? this.textPrimary,
       btnBackgroundPrimary: btnBackgroundPrimary ?? this.btnBackgroundPrimary,
       btnTextPrimary: btnTextPrimary ?? this.btnTextPrimary,
+      textPrimarySameBtn: textPrimarySameBtn ?? this.textPrimarySameBtn,
       textSecondary: textSecondary ?? this.textSecondary,
       textMuted: textMuted ?? this.textMuted,
       border: border ?? this.border,
       brand: brand ?? this.brand,
+      borderDefault: borderDefault ?? this.borderDefault,
+      accentAlt: accentAlt ?? this.accentAlt,
+      amber: amber ?? this.amber,
       priceUp: priceUp ?? this.priceUp,
       priceDown: priceDown ?? this.priceDown,
       radiusSm: radiusSm ?? this.radiusSm,
@@ -162,7 +191,13 @@ class AppCommon extends ThemeExtension<AppCommon> {
     return AppCommon(
       background: Color.lerp(background, other.background, t) ?? background,
       surface: Color.lerp(surface, other.surface, t) ?? surface,
+      surfaceElevated:
+          Color.lerp(surfaceElevated, other.surfaceElevated, t) ??
+          surfaceElevated,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t) ?? textPrimary,
+      textPrimarySameBtn:
+          Color.lerp(textPrimarySameBtn, other.textPrimarySameBtn, t) ??
+          textPrimarySameBtn,
       btnBackgroundPrimary:
           Color.lerp(btnBackgroundPrimary, other.btnBackgroundPrimary, t) ??
           btnBackgroundPrimary,
@@ -172,7 +207,11 @@ class AppCommon extends ThemeExtension<AppCommon> {
           Color.lerp(textSecondary, other.textSecondary, t) ?? textSecondary,
       textMuted: Color.lerp(textMuted, other.textMuted, t) ?? textMuted,
       border: Color.lerp(border, other.border, t) ?? border,
+      borderDefault:
+          Color.lerp(borderDefault, other.borderDefault, t) ?? borderDefault,
       brand: Color.lerp(brand, other.brand, t) ?? brand,
+      accentAlt: Color.lerp(accentAlt, other.accentAlt, t) ?? accentAlt,
+      amber: Color.lerp(amber, other.amber, t) ?? amber,
       priceUp: Color.lerp(priceUp, other.priceUp, t) ?? priceUp,
       priceDown: Color.lerp(priceDown, other.priceDown, t) ?? priceDown,
       radiusSm: lerpDouble(radiusSm, other.radiusSm, t) ?? radiusSm,

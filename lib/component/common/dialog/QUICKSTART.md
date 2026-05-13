@@ -5,7 +5,7 @@
 ### 步骤1：导入组件
 
 ```dart
-import 'package:tradingMt1/component/dialog/index.dart';
+import 'package:traveling_app/component/dialog/index.dart';
 ```
 
 ### 步骤2：创建控制器
@@ -97,7 +97,7 @@ ListenableBuilder(
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:tradingMt1/component/dialog/index.dart';
+import 'package:traveling_app/component/dialog/index.dart';
 
 class MyPage extends StatefulWidget {
   @override

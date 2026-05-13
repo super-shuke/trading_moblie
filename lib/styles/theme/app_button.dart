@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tradingMt1/styles/theme/app_common.dart';
+import 'package:traveling_app/styles/theme/app_common.dart';
 
 class AppButtonTheme {
   final ElevatedButtonThemeData elevated;
@@ -69,37 +69,37 @@ AppButtonTheme buildAppButtonTheme(AppCommon themes) {
 ElevatedButtonThemeData buildAppElevatedButtonTheme(AppCommon themes) {
   return ElevatedButtonThemeData(
     style: ButtonStyle(
-      backgroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.disabled)) {
-          return themes.btnBackgroundPrimary.withOpacity(0.4);
+      backgroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return themes.btnBackgroundPrimary.withValues(alpha: 0.4);
         }
         return themes.btnBackgroundPrimary;
       }),
-      foregroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.disabled)) {
-          return themes.btnTextPrimary.withOpacity(0.6);
+      foregroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return themes.btnTextPrimary.withValues(alpha: 0.6);
         }
         return themes.btnTextPrimary;
       }),
-      overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.hovered)) {
-          return themes.btnBackgroundPrimary.withOpacity(0.12);
+      overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.hovered)) {
+          return themes.btnBackgroundPrimary.withValues(alpha: 0.12);
         }
-        if (states.contains(MaterialState.focused) ||
-            states.contains(MaterialState.pressed)) {
-          return themes.btnBackgroundPrimary.withOpacity(0.2);
+        if (states.contains(WidgetState.focused) ||
+            states.contains(WidgetState.pressed)) {
+          return themes.btnBackgroundPrimary.withValues(alpha: 0.2);
         }
         return null;
       }),
-      padding: MaterialStateProperty.all(
+      padding: WidgetStatePropertyAll(
         EdgeInsets.symmetric(
           horizontal: themes.space16,
           vertical: themes.space12,
         ),
       ),
-      shape: MaterialStateProperty.all(
+      shape: WidgetStatePropertyAll(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(themes.radiusMd),
+          borderRadius: BorderRadius.circular(themes.radiusLg),
         ),
       ),
     ),
@@ -109,23 +109,29 @@ ElevatedButtonThemeData buildAppElevatedButtonTheme(AppCommon themes) {
 TextButtonThemeData buildAppTextButtonTheme(AppCommon themes) {
   return TextButtonThemeData(
     style: ButtonStyle(
-      foregroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.disabled)) {
-          return themes.brand.withOpacity(0.5);
+      foregroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return themes.brand.withValues(alpha: 0.5);
         }
         return themes.brand;
       }),
-      overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.hovered)) {
-          return themes.brand.withOpacity(0.12);
+      overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.hovered)) {
+          return themes.brand.withValues(alpha: 0.12);
         }
-        if (states.contains(MaterialState.focused) ||
-            states.contains(MaterialState.pressed)) {
-          return themes.brand.withOpacity(0.2);
+        if (states.contains(WidgetState.focused) ||
+            states.contains(WidgetState.pressed)) {
+          return themes.brand.withValues(alpha: 0.2);
         }
         return null;
       }),
-      padding: MaterialStateProperty.all(
+      side: WidgetStateProperty.resolveWith<BorderSide?>((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return BorderSide(color: themes.borderDefault);
+        }
+        return BorderSide(color: themes.borderDefault);
+      }),
+      padding: WidgetStatePropertyAll(
         EdgeInsets.symmetric(
           horizontal: themes.space12,
           vertical: themes.space8,
@@ -138,37 +144,37 @@ TextButtonThemeData buildAppTextButtonTheme(AppCommon themes) {
 OutlinedButtonThemeData buildAppOutlinedButtonTheme(AppCommon themes) {
   return OutlinedButtonThemeData(
     style: ButtonStyle(
-      foregroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.disabled)) {
-          return themes.brand.withOpacity(0.5);
+      foregroundColor: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return themes.brand.withValues(alpha: 0.5);
         }
         return themes.brand;
       }),
-      overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.hovered)) {
-          return themes.brand.withOpacity(0.12);
+      overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.hovered)) {
+          return themes.brand.withValues(alpha: 0.12);
         }
-        if (states.contains(MaterialState.focused) ||
-            states.contains(MaterialState.pressed)) {
-          return themes.brand.withOpacity(0.2);
+        if (states.contains(WidgetState.focused) ||
+            states.contains(WidgetState.pressed)) {
+          return themes.brand.withValues(alpha: 0.2);
         }
         return null;
       }),
-      side: MaterialStateProperty.resolveWith<BorderSide?>((states) {
-        if (states.contains(MaterialState.disabled)) {
-          return BorderSide(color: themes.border);
+      side: WidgetStateProperty.resolveWith<BorderSide?>((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return BorderSide(color: themes.borderDefault.withValues(alpha: 0.5));
         }
-        return BorderSide(color: themes.brand);
+        return BorderSide(color: themes.borderDefault);
       }),
-      padding: MaterialStateProperty.all(
+      padding: WidgetStatePropertyAll(
         EdgeInsets.symmetric(
           horizontal: themes.space16,
           vertical: themes.space12,
         ),
       ),
-      shape: MaterialStateProperty.all(
+      shape: WidgetStatePropertyAll(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(themes.radiusMd),
+          borderRadius: BorderRadius.circular(themes.radiusLg),
         ),
       ),
     ),

@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
 
 class UserStore extends ChangeNotifier {
-  String _username = 'Guest';
+  String _username = 'Explorer';
+  String _email = '';
   bool _isLoggedIn = false;
 
   String get username => _username;
+  String get email => _email;
   bool get isLoggedIn => _isLoggedIn;
 
-  void login(String name) {
+  void login(String name, {String email = ''}) {
     _username = name;
+    _email = email;
     _isLoggedIn = true;
     notifyListeners();
   }
 
   void logout() {
     _username = 'Guest';
+    _email = '';
     _isLoggedIn = false;
     notifyListeners();
   }

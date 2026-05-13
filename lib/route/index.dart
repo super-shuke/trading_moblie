@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tradingMt1/route/bottomRoute/index.dart';
-import 'package:tradingMt1/route/routers.dart';
+import 'package:traveling_app/route/bottomRoute/index.dart';
+import 'package:traveling_app/route/routers.dart';
 
 // 根导航 key，用于需要覆盖底部栏的路由。
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -88,7 +88,7 @@ CustomTransitionPage<T> buildPageWithAnimation<T>({
 
 final GoRouter mainRouter = GoRouter(
   // 应用初始路由。
-  initialLocation: tabRoutes.first['path'] as String,
+  initialLocation: '/login',
   // 根导航 key，用于全屏路由跳转。
   navigatorKey: _rootNavigatorKey,
   routes: <RouteBase>[

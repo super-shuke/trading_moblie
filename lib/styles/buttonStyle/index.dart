@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tradingMt1/styles/theme/app_button.dart';
+import 'package:traveling_app/styles/theme/app_button.dart';
 
 class CommonButtonStyle {
   CommonButtonStyle._();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tradingMt1/route/routers.dart';
-import 'package:tradingMt1/styles/theme/app_common.dart';
+import 'package:traveling_app/route/routers.dart';
+import 'package:traveling_app/styles/theme/app_common.dart';
 
 class ScaffoldWithNavBar extends StatefulWidget {
   // 底部导航使用的路由壳。

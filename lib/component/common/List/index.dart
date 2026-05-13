@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tradingMt1/l10n/app_localizations.dart';
-import 'package:tradingMt1/styles/theme/app_common.dart';
+import 'package:traveling_app/l10n/app_localizations.dart';
+import 'package:traveling_app/styles/theme/app_common.dart';
 
 /// 包含列表项的索引、数据和可见比例
 class VisibleItemInfo {

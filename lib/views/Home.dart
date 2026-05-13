@@ -1,200 +1,217 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:tradingMt1/component/common/List/index.dart';
-import 'package:tradingMt1/component/common/pageContent/index.dart';
-import 'package:tradingMt1/l10n/app_localizations.dart';
-import 'package:tradingMt1/styles/textStyle/index.dart';
-import 'package:tradingMt1/styles/theme/app_button.dart';
-import 'package:tradingMt1/styles/theme/app_common.dart';
-import 'package:tradingMt1/store/common/common_store.dart';
+import 'package:go_router/go_router.dart';
+import 'package:traveling_app/component/travel/earth_globe.dart';
+import 'package:traveling_app/component/travel/kit.dart';
+import 'package:traveling_app/service/travel_data.dart';
+import 'package:traveling_app/store/travel/travel_store.dart';
+import 'package:traveling_app/styles/theme/app_common.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
 
   @override
-  State<Home> createState() => _MyHomePageState();
+  State<Home> createState() => _HomeState();
 }
 
-class _MyHomePageState extends State<Home> {
-  List<Map<String, dynamic>> priceList = [];
-
-  @override
-  void initState() {
-    super.initState();
-  }
+class _HomeState extends State<Home> {
+  bool _requestedLocation = false;
 
   @override
   Widget build(BuildContext context) {
-    final content = Theme.of(context);
-    final buttonStyles = content.extension<AppButtonStyles>();
-    final textCommon = AppLocalizations.of(context);
-    final commonStore = CommonStoreScope.of(context);
+    final tokens = Theme.of(context).extension<AppCommon>()!;
+    final store = TravelStoreScope.of(context);
+    final cities = store.cities;
 
-    return PageContent(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          child: _homeWidget(context),
-        ),
-      ),
+    if (!_requestedLocation && !store.hasRequestedLocation) {
+      _requestedLocation = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        store.requestUserLocation();
+      });
+    }
 
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
+    return Scaffold(
+      backgroundColor: tokens.background,
+      body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ElevatedButton(
-              style: buttonStyles!.elevated,
-              onPressed: () {
-                print('点击了刷新按钮');
-                commonStore.toggleLightDark();
-              },
-              child: Text(
-                textCommon!.changeTheme,
-                style: content.textTheme.labelMedium,
+            _Header(tokens: tokens, store: store),
+            Expanded(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final size = constraints.maxWidth.clamp(280.0, 360.0);
+                        return Center(
+                          child: TravelEarthGlobe(
+                            size: size,
+                            cities: cities,
+                            userLocation: store.userLocation,
+                            userLabel: 'Hong Kong',
+                            onCityTap: (city) {
+                              context.push('/explore/city/${city.id}');
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    height: 88,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: cities.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 12),
+                      itemBuilder: (context, index) {
+                        final city = cities[index];
+                        return _CityCard(city: city);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const _BottomBar(),
+                  const SizedBox(height: 16),
+                ],
               ),
             ),
-            Expanded(child: _listWidget(priceList)),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _homeWidget(BuildContext context) {
-    final tokens = Theme.of(context).extension<AppCommon>()!;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        IconButton(
-          icon: Icon(Icons.menu, color: tokens.textSecondary),
-          onPressed: () {},
-        ),
-        Text(
-          AppLocalizations.of(context)!.homeTitle,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        IconButton(
-          icon: Icon(Icons.edit_outlined, color: tokens.textSecondary),
-          onPressed: () {},
-        ),
-      ],
+class _Header extends StatelessWidget {
+  final AppCommon tokens;
+  final TravelStore store;
+
+  const _Header({required this.tokens, required this.store});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const TravelLabel('YOUR ATLAS · 38 CITIES'),
+              GestureDetector(
+                onTap: () => context.go('/profile'),
+                child: const TravelLabel('PROFILE →'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Where to next?',
+            style: Theme.of(context).textTheme.displayMedium,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _locationStatus(store),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: tokens.textMuted),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _listWidget(List<Map<String, dynamic>> list) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: CustomList(
-              itemHeight: 60,
-              dataList: list,
-              itemBuilder: (context, item, index) {
-                return InkWell(
-                  onTap: () {
-                    // 处理点击事件
-                    print('点击了 ${item['symbol']}');
-                  },
-                  splashColor: Theme.of(context).splashColor,
-                  highlightColor: Theme.of(context).highlightColor,
+  String _locationStatus(TravelStore store) {
+    if (store.isLocating) {
+      return 'Finding your location...';
+    }
+    if (store.locationError != null) {
+      return 'Location unavailable · using saved map context';
+    }
+    final city = store.nearestCity;
+    if (city != null) {
+      return 'Current city · ${city.name}';
+    }
+    return 'Location ready';
+  }
+}
 
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    height: double.infinity,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+class _CityCard extends StatelessWidget {
+  final City city;
 
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              item['priceChange'].toString(),
-                              style: CommonTextStyle.captionBold(context),
-                            ),
-                            const SizedBox(width: 5),
-                            Text(
-                              item['priceChangePercent'],
-                              style: CommonTextStyle.price(context),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item['symbol'].toString(),
-                                  style: CommonTextStyle.normal(context),
-                                ),
-                                Text(
-                                  item['openTime'],
-                                  style: CommonTextStyle.captionBold(context),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item['buy'] ?? item['lastPrice'],
-                                      style: CommonTextStyle.normal(context),
-                                    ),
-                                    Text(
-                                      'L: ${item['lowPrice']}',
-                                      style: CommonTextStyle.captionBold(
-                                        context,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(width: 10),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+  const _CityCard({required this.city});
 
-                                  children: [
-                                    Text(
-                                      item['sell'] ?? item['lastPrice'],
-                                      style: CommonTextStyle.normal(context),
-                                    ),
-                                    Text(
-                                      'H: ${item['highPrice']}',
-                                      style: CommonTextStyle.captionBold(
-                                        context,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).extension<AppCommon>()!;
+    return InkWell(
+      onTap: () => context.push('/explore/city/${city.id}'),
+      borderRadius: BorderRadius.circular(tokens.radiusLg),
+      child: Container(
+        width: 220,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: tokens.surface,
+          borderRadius: BorderRadius.circular(tokens.radiusLg),
+          border: Border.all(color: tokens.border),
+        ),
+        child: Row(
+          children: [
+            TravelPlaceholderImage(
+              seed: city.heroImageRef,
+              width: 56,
+              height: 56,
+              radius: BorderRadius.circular(tokens.radiusMd),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    city.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: tokens.textPrimary,
                     ),
                   ),
-                );
-              },
+                  const SizedBox(height: 4),
+                  TravelLabel('${city.poiCount} places · ${city.country}'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomBar extends StatelessWidget {
+  const _BottomBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () => context.go('/itinerary'),
+              icon: const Icon(Icons.calendar_month_outlined),
+              label: const Text('Plan a Trip'),
             ),
           ),
+          const SizedBox(width: 12),
+          OutlinedButton(onPressed: () {}, child: const Text('Search')),
         ],
       ),
     );

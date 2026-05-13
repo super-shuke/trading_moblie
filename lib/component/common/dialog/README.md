@@ -16,7 +16,7 @@
 ### 基本用法
 
 ```dart
-import 'package:tradingMt1/component/dialog/index.dart';
+import 'package:traveling_app/component/dialog/index.dart';
 
 class MyPage extends StatefulWidget {
   @override

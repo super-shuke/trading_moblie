@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 enum DialogAnimationType {
   /// 中间淡入淡出 + 缩放
   fade,
-  
+
   /// 从底部向上滑动
   slideFromBottom,
 }
@@ -76,20 +76,20 @@ class _CustomDialogState extends State<CustomDialog>
       vsync: this,
     );
 
-    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _opacityAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0.0, 1.0), // 从底部开始
       end: Offset.zero, // 到原位置
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     if (widget.isVisible) {
       _controller.forward();
@@ -130,7 +130,9 @@ class _CustomDialogState extends State<CustomDialog>
       animation: _controller,
       builder: (context, child) {
         return Visibility(
-          visible: widget.isVisible || _controller.status != AnimationStatus.dismissed,
+          visible:
+              widget.isVisible ||
+              _controller.status != AnimationStatus.dismissed,
           child: Stack(
             children: [
               // 遮罩层
@@ -144,9 +146,7 @@ class _CustomDialogState extends State<CustomDialog>
                       onTap: _handleClose,
                       child: Opacity(
                         opacity: _opacityAnimation.value,
-                        child: Container(
-                          color: widget.config.maskColor,
-                        ),
+                        child: Container(color: widget.config.maskColor),
                       ),
                     ),
                   ),
@@ -174,7 +174,7 @@ class _CustomDialogState extends State<CustomDialog>
             ),
           ),
         );
-      
+
       case DialogAnimationType.slideFromBottom:
         // 从底部向上滑动
         return Align(
