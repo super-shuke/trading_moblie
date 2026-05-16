@@ -43,3 +43,34 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Unity exports integrated locally
+/ios/unityLibrary/
+/android/unityLibrary/
+/android/UnityLibrary/
+/unityLibrary/
+/UnityLibrary/
+
+# iOS generated dependencies and build/package output
+/ios/Pods/
+/ios/.symlinks/
+/ios/build/
+*.xcarchive
+*.ipa
+*.dSYM/
+ExportOptions.plist
+*.mobileprovision
+*.p12
+
+# Android generated dependencies and build/package output
+**/build/
+*.apk
+*.aab
+*.apks
+key.properties
+*.keystore
+*.jks
+
+# Local signing and environment files
+*.env
+*.env.local

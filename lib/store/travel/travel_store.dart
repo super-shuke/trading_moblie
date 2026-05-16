@@ -9,7 +9,12 @@ import 'package:traveling_app/service/travel_data.dart';
 /// 集中管理探索、详情、行程和个人页共享的数据。
 class TravelStore extends ChangeNotifier {
   final List<City> _cities = TravelMockData.cities;
-  LatLng _userLocation = const LatLng(22.3193, 114.1694);
+  UserLocation _userLocation = const UserLocation(
+    id: 'current_location',
+    city: 'Hong Kong',
+    country: 'Hong Kong',
+    coordinates: LatLng(22.3193, 114.1694),
+  );
   UserProfile _profile = TravelMockData.profile;
   Itinerary _itinerary = TravelMockData.defaultItinerary();
   bool _isLocating = false;
@@ -17,7 +22,7 @@ class TravelStore extends ChangeNotifier {
   String? _locationError;
 
   List<City> get cities => _cities;
-  LatLng get userLocation => _userLocation;
+  UserLocation get userLocation => _userLocation;
   UserProfile get profile => _profile;
   Itinerary get itinerary => _itinerary;
   bool get isLocating => _isLocating;
@@ -29,14 +34,11 @@ class TravelStore extends ChangeNotifier {
 
     for (final city in _cities) {
       final currentDistance = Geolocator.distanceBetween(
-        _userLocation.lat,
-        _userLocation.lon,
+        _userLocation.coordinates.lat,
+        _userLocation.coordinates.lon,
         city.location.lat,
         city.location.lon,
       );
-      print(currentDistance);
-      print(distance);
-      print(city.name);
       if (currentDistance < distance) {
         distance = currentDistance;
         match = city;
@@ -103,27 +105,54 @@ class TravelStore extends ChangeNotifier {
           accuracy: LocationAccuracy.high,
         ),
       );
-      List<Placemark> placemarks = await placemarkFromCoordinates(
+      final placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
       );
-      final pos = await Geolocator.getCurrentPosition();
-
-      print('定位信息：${position}');
-      print('当前定位信息：${pos.latitude},${pos.longitude}');
-      final place = placemarks.first;
-
-      print(place.locality); // 城市（如：Denpasar）
-      print(place.subAdministrativeArea); // 区
-      print(place.country); // 国家
-
-      _userLocation = LatLng(position.latitude, position.longitude);
+      _userLocation = _locationFromPosition(
+        position,
+        placemarks.isEmpty ? null : placemarks.first,
+      );
     } catch (error) {
       _locationError = error.toString();
     } finally {
       _isLocating = false;
       notifyListeners();
     }
+  }
+
+  UserLocation _locationFromPosition(Position position, Placemark? place) {
+    final cityName = _firstNonEmpty([
+      place?.locality,
+      place?.subAdministrativeArea,
+      place?.administrativeArea,
+    ]);
+    final country = _firstNonEmpty([place?.country, place?.isoCountryCode]);
+
+    return UserLocation(
+      id: 'current_${_slug(cityName ?? 'location')}',
+      city: cityName ?? 'Current Location',
+      country: country ?? 'Unknown',
+      coordinates: LatLng(position.latitude, position.longitude),
+    );
+  }
+
+  String? _firstNonEmpty(Iterable<String?> values) {
+    for (final value in values) {
+      final trimmed = value?.trim();
+      if (trimmed != null && trimmed.isNotEmpty) {
+        return trimmed;
+      }
+    }
+    return null;
+  }
+
+  String _slug(String value) {
+    final normalized = value
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'^_+|_+$'), '');
+    return normalized.isEmpty ? 'location' : normalized;
   }
 
   /// 调整 itinerary 中 stop 的顺序。

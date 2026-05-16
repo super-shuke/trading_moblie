@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.flutter_application_1"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.2.12479018"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -24,10 +24,29 @@ android {
         applicationId = "com.example.flutter_application_1"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 25
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    androidResources {
+        val unityStreamingAssetsList =
+            (project.findProperty("unityStreamingAssets") as? String)
+                ?.split(",")
+                ?.map { it.trim() }
+                ?.filter { it.isNotEmpty() }
+                ?: emptyList()
+
+        noCompress += listOf(
+            ".unity3d",
+            ".ress",
+            ".resource",
+            ".obb",
+            ".bundle",
+            ".unityexp",
+        ) + unityStreamingAssetsList
+        ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~"
     }
 
     buildTypes {
@@ -41,4 +60,10 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    if (project.findProject(":unityLibrary") != null) {
+        implementation(project(":unityLibrary"))
+    }
 }

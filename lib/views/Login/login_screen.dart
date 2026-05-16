@@ -120,7 +120,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
-                          TravelLocationIcon(location: 'GEOTRAVEL · V0.1'),
+                          TravelLocationIcon(
+                            location: travelStore.userLocation.city,
+                          ),
                           const SizedBox(height: 20),
                           SizedBox(
                             width: double.infinity,
@@ -265,7 +267,15 @@ class _LoginGlobeStage extends StatelessWidget {
           size: globeSize,
           cities: store.cities,
           userLocation: store.userLocation,
-          userLabel: store.isLocating ? null : 'Nearby picks',
+          userLabel: store.isLocating ? null : store.userLocation.city,
+          useUnity: true,
+          camera: const UnityGlobeCamera(
+            longitude: 115,
+            latitude: 0,
+            height: 30000000,
+          ),
+          autoRotate: true,
+          autoRotateDegreesPerSecond: 4,
         ),
       ],
     );
@@ -324,7 +334,6 @@ class _LoginCard extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     height: 1.4,
                     isSystemFont: true,
-
                   ),
                 ),
               ),

@@ -51,7 +51,12 @@ class _HomeState extends State<Home> {
                             size: size,
                             cities: cities,
                             userLocation: store.userLocation,
-                            userLabel: 'Hong Kong',
+                            userLabel: store.userLocation.city,
+                            camera: const UnityGlobeCamera(
+                              longitude: 115,
+                              latitude: 0,
+                              height: 30000000,
+                            ),
                             onCityTap: (city) {
                               context.push('/explore/city/${city.id}');
                             },
@@ -133,11 +138,7 @@ class _Header extends StatelessWidget {
     if (store.locationError != null) {
       return 'Location unavailable · using saved map context';
     }
-    final city = store.nearestCity;
-    if (city != null) {
-      return 'Current city · ${city.name}';
-    }
-    return 'Location ready';
+    return 'Current city · ${store.userLocation.city}';
   }
 }
 

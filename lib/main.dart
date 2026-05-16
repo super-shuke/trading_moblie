@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:traveling_app/component/travel/globe/unity_preloader.dart';
 import 'package:traveling_app/route/index.dart';
 import 'package:traveling_app/service/network/dio_quest.dart';
 import 'package:traveling_app/service/socket/mainSocket.dart';
@@ -62,6 +62,14 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp.router(
             onGenerateTitle: (context) => 'GeoTravel',
             routerConfig: mainRouter,
+            builder: (context, child) {
+              return Stack(
+                children: [
+                  if (child != null) child,
+                  const UnityPreloader(),
+                ],
+              );
+            },
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
             themeMode: _commonStore.themeMode,

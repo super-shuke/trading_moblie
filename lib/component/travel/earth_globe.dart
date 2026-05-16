@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:traveling_app/component/travel/globe/unity_globe_container.dart';
 import 'package:traveling_app/service/travel_data.dart';
 
+export 'package:traveling_app/component/travel/globe/unity_globe_container.dart'
+    show UnityGlobeCamera;
+
 class TravelEarthGlobe extends StatelessWidget {
   final List<City> cities;
-  final LatLng userLocation;
+  final UserLocation userLocation;
   final String? userLabel;
   final void Function(City city)? onCityTap;
   final double size;
+  final bool useUnity;
+  final UnityGlobeCamera? camera;
+  final bool autoRotate;
+  final double autoRotateDegreesPerSecond;
 
   const TravelEarthGlobe({
     super.key,
@@ -16,6 +23,10 @@ class TravelEarthGlobe extends StatelessWidget {
     this.userLabel,
     this.onCityTap,
     this.size = 320,
+    this.useUnity = true,
+    this.camera,
+    this.autoRotate = false,
+    this.autoRotateDegreesPerSecond = 6,
   });
 
   @override
@@ -26,6 +37,10 @@ class TravelEarthGlobe extends StatelessWidget {
       cities: cities,
       userLocation: userLocation,
       onCityTap: onCityTap,
+      useUnity: useUnity,
+      camera: camera,
+      autoRotate: autoRotate,
+      autoRotateDegreesPerSecond: autoRotateDegreesPerSecond,
     );
   }
 }

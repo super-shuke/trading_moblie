@@ -47,6 +47,8 @@ dependencies:
   flutter_bloc: ^8.1.6
   equatable: ^2.0.5
   google_fonts: ^6.2.1
+  flutter_embed_unity: ^2.0.0
+  flutter_embed_unity_6000_0_android: ^2.0.0
 
 dev_dependencies:
   flutter_test:

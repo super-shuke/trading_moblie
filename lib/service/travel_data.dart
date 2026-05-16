@@ -16,6 +16,32 @@ class LatLng {
 }
 
 @immutable
+class UserLocation {
+  final String id;
+  final String city;
+  final String country;
+  final LatLng coordinates;
+
+  const UserLocation({
+    required this.id,
+    required this.city,
+    required this.country,
+    required this.coordinates,
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      other is UserLocation &&
+      other.id == id &&
+      other.city == city &&
+      other.country == country &&
+      other.coordinates == coordinates;
+
+  @override
+  int get hashCode => Object.hash(id, city, country, coordinates);
+}
+
+@immutable
 class MultiRating {
   final double atmosphere;
   final double photos;
