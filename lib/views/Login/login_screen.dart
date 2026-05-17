@@ -275,7 +275,6 @@ class _LoginGlobeStage extends StatelessWidget {
             height: 30000000,
           ),
           autoRotate: true,
-          autoRotateDegreesPerSecond: 4,
         ),
       ],
     );
