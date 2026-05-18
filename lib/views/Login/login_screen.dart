@@ -77,6 +77,12 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/earth_globe/2k_stars.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -84,21 +90,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 final horizontalPadding = isWide ? 40.0 : 24.0;
                 final globeWidth = isWide ? 420.0 : double.infinity;
                 final globeHeight = isWide ? 400.0 : 400.0;
-                final globeSpacerHeight = isWide ? 480.0 : 400.0;
 
                 return Stack(
                   fit: StackFit.expand,
                   clipBehavior: Clip.none,
                   children: [
                     Positioned.fill(
-                      child: Image.asset(
-                        'assets/earth_globe/2k_stars.jpg',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned.fill(
                       child: TravelEarthGlobeView(
-                        size: globeWidth,
                         width: globeWidth,
                         height: globeHeight,
                         backgroundSize: Size.infinite,
@@ -127,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: SingleChildScrollView(
                         child: Column(
                           children: [
-                            SizedBox(height: globeSpacerHeight),
+                            SizedBox(height: 360),
                             Padding(
                               padding: EdgeInsets.fromLTRB(
                                 horizontalPadding,

@@ -32,7 +32,7 @@ class TravelEarthGlobeView extends StatefulWidget {
   /// 组件正方形边长（默认形态）。当 [width]/[height] 都没设时使用这个值。
   ///
   /// 决定 SizedBox 的宽高，**也间接决定球的大小**——因为球半径取自宽高较小值的一半。
-  final double size;
+  final double? size;
 
   /// 自定义组件宽度（覆盖 [size]）。设置后变长方形。
   final double? width;
@@ -95,9 +95,9 @@ class TravelEarthGlobeView extends StatefulWidget {
 
   const TravelEarthGlobeView({
     super.key,
-    required this.size,
     this.width,
     this.height,
+    this.size = 400,
     this.backgroundSize,
     required this.cities,
     required this.userLocation,
@@ -140,41 +140,37 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
 
       // ─── 缩放（相机距离，不是球大小）────────────────────
       zoom: widget.zoom,
-      minZoom: -0.6,                            // 最小缩放（最远）
-      maxZoom: 1.4,                             // 最大缩放（最近）
-      isZoomEnabled: widget.onCityTap != null,  // 只有可点击时才允许缩放
-      panSensitivity: 0.75,                     // 拖拽灵敏度
-      zoomSensitivity: 0.55,                    // 缩放灵敏度
-
+      minZoom: -0.6, // 最小缩放（最远）
+      maxZoom: 1.4, // 最大缩放（最近）
+      isZoomEnabled: widget.onCityTap != null, // 只有可点击时才允许缩放
+      panSensitivity: 0.75, // 拖拽灵敏度
+      zoomSensitivity: 0.55, // 缩放灵敏度
       // ─── 大气层 ───────────────────────────────────────
       showAtmosphere: true,
-      atmosphereOpacity: 0.28,                  // 透明度（0 全透 ~ 1 不透）
-      atmosphereThickness: 0.04,                // 大气厚度
-      atmosphereBlur: 28,                       // 模糊度（越大越柔和）
-
+      atmosphereOpacity: 0.28, // 透明度（0 全透 ~ 1 不透）
+      atmosphereThickness: 0.04, // 大气厚度
+      atmosphereBlur: 30, // 模糊度（越大越柔和）
       // ─── 光照 ─────────────────────────────────────────
       surfaceLightingEnabled: true,
-      lightAngle: -35,                          // 光源角度（度数）
-      lightIntensity: 0.72,                     // 光照强度
-      ambientLight: 0.58,                       // 环境光（决定阴影区有多亮）
-
+      lightAngle: -35, // 光源角度（度数）
+      lightIntensity: 0.72, // 光照强度
+      ambientLight: 0.58, // 环境光（决定阴影区有多亮）
       // ─── 昼夜循环 ─────────────────────────────────────
       isDayNightCycleEnabled: true,
-      dayNightMode: DayNightMode.simulated,     // 模拟的昼夜（不依赖真实时间）
+      dayNightMode: DayNightMode.simulated, // 模拟的昼夜（不依赖真实时间）
       simulatedNightColor: const Color(0xFF081326),
-      simulatedNightIntensity: 0.24,            // 夜晚区域有多暗
-
+      simulatedNightIntensity: 0.24, // 夜晚区域有多暗
       // ─── 球体样式（阴影 + 渐变叠加） ────────────────────
       sphereStyle: const SphereStyle(
-        shadowColor: Color(0x663AA8FF),         // 球体外发光颜色（蓝色）
-        shadowBlurSigma: 22,                    // 发光模糊度
-        showGradientOverlay: true,              // 是否叠加渐变滤镜
+        shadowColor: Color(0x663AA8FF), // 球体外发光颜色（蓝色）
+        shadowBlurSigma: 22, // 发光模糊度
+        showGradientOverlay: true, // 是否叠加渐变滤镜
         gradientOverlay: RadialGradient(
-          center: Alignment(-0.32, -0.36),      // 高光中心位置（左上）
+          center: Alignment(-0.32, -0.36), // 高光中心位置（左上）
           colors: [
             Colors.transparent,
             Color(0x08000000),
-            Color(0x52000000),                  // 边缘变暗的程度
+            Color(0x52000000), // 边缘变暗的程度
           ],
           stops: [0.08, 0.62, 1.0],
         ),
@@ -246,7 +242,7 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
             width: viewport.width,
             height: viewport.height,
             child: Align(
-              alignment: widget.globeAlignment,    // 球在舞台里的位置
+              alignment: widget.globeAlignment, // 球在舞台里的位置
               child: _globe(),
             ),
           );
@@ -255,11 +251,7 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
     }
 
     // 模式 B：默认 → 球占据整个 width × height 区域
-    return SizedBox(
-      width: _globeWidth,
-      height: _globeHeight,
-      child: _globe(),
-    );
+    return SizedBox(width: _globeWidth, height: _globeHeight, child: _globe());
   }
 
   /// 渲染地球本身。
@@ -283,10 +275,10 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
   // ─── 尺寸计算 ────────────────────────────────────────
 
   /// 组件实际宽度：优先用 [width]，否则用正方形 [size]。
-  double get _globeWidth => widget.width ?? widget.size;
+  double get _globeWidth => widget.width ?? widget.size!;
 
   /// 组件实际高度：优先用 [height]，否则用正方形 [size]。
-  double get _globeHeight => widget.height ?? widget.size;
+  double get _globeHeight => widget.height?? widget.size!;
 
   /// 地球物理半径 = 宽高较小值的一半。
   ///
@@ -297,7 +289,7 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
   /// **想让球更小**（容器里留白）：在末尾乘一个 < 1 的系数。
   /// 例如 `* 0.8` 表示球只占容器较小边的 80%。
   double get _globeRadius =>
-      (_globeWidth < _globeHeight ? _globeWidth : _globeHeight) / 2 *0.88;
+      (_globeWidth < _globeHeight ? _globeWidth : _globeHeight) / 2 * 0.8;
 
   // ─── 点位管理 ────────────────────────────────────────
 
@@ -325,10 +317,10 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
       label: widget.userLocation.city,
       isLabelVisible: widget.showLabels,
       style: const earth.PointStyle(
-        size: 6,                                // 点大小（用户位置稍大）
-        color: Color(0xFFFFD166),               // 金色
-        altitude: 0.015,                        // 凸出球面的高度
-        transitionDuration: 350,                // 过渡动画
+        size: 6, // 点大小（用户位置稍大）
+        color: Color(0xFFFFD166), // 金色
+        altitude: 0.015, // 凸出球面的高度
+        transitionDuration: 350, // 过渡动画
       ),
       labelTextStyle: _labelStyle(const Color(0xFFFFD166)),
     );
@@ -345,13 +337,13 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
       coordinates: GlobeCoordinates(city.location.lat, city.location.lon),
       label: city.name,
       isLabelVisible: widget.showLabels,
-      labelOffset: const Offset(8, -8),         // 标签相对点的偏移
+      labelOffset: const Offset(8, -8), // 标签相对点的偏移
       style: earth.PointStyle(
-        size: 4,                                // 点大小
+        size: 4, // 点大小
         color: markerColor,
         altitude: 0.012,
         transitionDuration: 350,
-        merge: true,                            // 临近的点会合并（性能优化）
+        merge: true, // 临近的点会合并（性能优化）
       ),
       labelTextStyle: _labelStyle(markerColor),
       onTap: widget.onCityTap == null ? null : () => widget.onCityTap!(city),
