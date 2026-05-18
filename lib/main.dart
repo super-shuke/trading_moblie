@@ -44,11 +44,10 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   // 1. 在这里实例化所有的 Store，确保它们的生命周期跟 App 一样长
-  final CommonStore _commonStore = CommonStore(
-    initialThemeMode: AppTheme.defaultThemeMode,
-  );
+
   final UserStore _userStore = UserStore();
   final TravelStore _travelStore = TravelStore();
+  final CommonStore _commonStore = CommonStore();
   @override
   Widget build(BuildContext context) {
     // 2. 传给 AppProviders 进行注入
@@ -64,10 +63,7 @@ class _MyAppState extends State<MyApp> {
             routerConfig: mainRouter,
             builder: (context, child) {
               return Stack(
-                children: [
-                  if (child != null) child,
-                  const UnityPreloader(),
-                ],
+                children: [if (child != null) child, const UnityPreloader()],
               );
             },
             theme: AppTheme.light(),

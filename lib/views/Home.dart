@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traveling_app/component/travel/earth_globe.dart';
+import 'package:traveling_app/component/travel/earthGlobe/travel_earth_globe_view.dart';
+import 'package:traveling_app/component/travel/globe/unity_preloader.dart';
 import 'package:traveling_app/component/travel/kit.dart';
 import 'package:traveling_app/service/travel_data.dart';
 import 'package:traveling_app/store/travel/travel_store.dart';
@@ -34,58 +35,62 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       backgroundColor: tokens.background,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _Header(tokens: tokens, store: store),
-            Expanded(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final size = constraints.maxWidth.clamp(280.0, 360.0);
-                        return Center(
-                          child: TravelEarthGlobe(
-                            size: size,
-                            cities: cities,
-                            userLocation: store.userLocation,
-                            userLabel: store.userLocation.city,
-                            camera: const UnityGlobeCamera(
-                              longitude: 115,
-                              latitude: 0,
-                              height: 30000000,
-                            ),
-                            onCityTap: (city) {
-                              context.push('/explore/city/${city.id}');
-                            },
-                          ),
-                        );
-                      },
-                    ),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Header(tokens: tokens, store: store),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final size = constraints.maxWidth.clamp(
+                              280.0,
+                              360.0,
+                            );
+                            return Center(
+                              child: TravelEarthGlobeView(
+                                size: size,
+                                cities: cities,
+                                userLocation: store.userLocation,
+                                onCityTap: (city) {
+                                  context.push('/explore/city/${city.id}');
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        height: 88,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          scrollDirection: Axis.horizontal,
+                          itemCount: cities.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 12),
+                          itemBuilder: (context, index) {
+                            final city = cities[index];
+                            return _CityCard(city: city);
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const _BottomBar(),
+                      const SizedBox(height: 16),
+                    ],
                   ),
-                  SizedBox(
-                    height: 88,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: cities.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 12),
-                      itemBuilder: (context, index) {
-                        final city = cities[index];
-                        return _CityCard(city: city);
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const _BottomBar(),
-                  const SizedBox(height: 16),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          // Preload Unity invisibly so deeper globe screens can open faster.
+          const UnityPreloader(),
+        ],
       ),
     );
   }

@@ -18,11 +18,11 @@ class TravelEarthGlobe extends StatelessWidget {
   final UnityGlobeCamera? camera;
 
   /// 控制是否开启 Unity 侧地球自转。
-  /// 发送 Configure 时会覆盖 config['autoRotateEnabled']。
+  /// 会覆盖 config['autoRotateEnabled']。
   final bool autoRotate;
 
-  /// 传给 Unity GlobeOverviewCamera.Configure 的配置。
-  /// 不传时默认关闭手势、开启自转、速度为 3。
+  /// 传给 Unity GlobeOverviewCamera 的配置。
+  /// 不传时默认关闭手势、开启自转、速度为 1.6。
   final Map<String, Object?> config;
 
   const TravelEarthGlobe({

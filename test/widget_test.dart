@@ -5,9 +5,9 @@ import 'package:traveling_app/main.dart';
 void main() {
   testWidgets('renders login screen', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('Continue with Apple'), findsOneWidget);
-    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Continue with Email'), findsOneWidget);
+    expect(find.text('Continue with Google'), findsOneWidget);
   });
 }

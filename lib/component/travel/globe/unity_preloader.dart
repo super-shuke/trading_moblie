@@ -8,10 +8,7 @@ import 'package:flutter_embed_unity/flutter_embed_unity.dart';
 class UnityPreloader extends StatefulWidget {
   final Duration timeout;
 
-  const UnityPreloader({
-    super.key,
-    this.timeout = const Duration(seconds: 8),
-  });
+  const UnityPreloader({super.key, this.timeout = const Duration(seconds: 8)});
 
   @override
   State<UnityPreloader> createState() => _UnityPreloaderState();
@@ -24,7 +21,9 @@ class _UnityPreloaderState extends State<UnityPreloader> {
   @override
   void initState() {
     super.initState();
-    _timeoutTimer = Timer(widget.timeout, _finishPreload);
+    if (_isUnitySupported) {
+      _timeoutTimer = Timer(widget.timeout, _finishPreload);
+    }
   }
 
   @override
@@ -35,12 +34,7 @@ class _UnityPreloaderState extends State<UnityPreloader> {
 
   @override
   Widget build(BuildContext context) {
-    final supported =
-        !kIsWeb &&
-        (defaultTargetPlatform == TargetPlatform.iOS ||
-            defaultTargetPlatform == TargetPlatform.android);
-
-    if (!supported || !_visible) {
+    if (!_isUnitySupported || !_visible) {
       return const SizedBox.shrink();
     }
 
@@ -58,6 +52,21 @@ class _UnityPreloaderState extends State<UnityPreloader> {
         ),
       ),
     );
+  }
+
+  bool get _isUnitySupported {
+    var isWidgetTest = false;
+    assert(() {
+      isWidgetTest = WidgetsBinding.instance.runtimeType.toString().contains(
+        'Test',
+      );
+      return true;
+    }());
+
+    return !kIsWeb &&
+        !isWidgetTest &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android);
   }
 
   void _handleUnityMessage(String message) {

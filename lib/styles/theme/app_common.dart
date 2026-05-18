@@ -97,7 +97,7 @@ class AppCommon extends ThemeExtension<AppCommon> {
       background: Color(0xFF0D1410),
       surface: Color(0xFF152019),
       surfaceElevated: Color(0xFF1B2922),
-      textPrimary: Color(0xFFEEE5D6),
+      textPrimary: Color(0xFFFFFFFF),
       btnBackgroundPrimary: Color(0xFF7dd87d),
       btnTextPrimary: Color(0xFF0D1410),
       textPrimarySameBtn: Color(0xFF7dd87d),

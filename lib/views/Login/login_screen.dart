@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traveling_app/component/travel/earth_globe.dart';
+import 'package:traveling_app/component/travel/earthGlobe/travel_earth_globe_view.dart';
+import 'package:traveling_app/component/travel/globe/unity_preloader.dart';
 import 'package:traveling_app/component/travel/kit.dart';
 import 'package:traveling_app/service/google_auth_service.dart';
-// import 'package:traveling_app/store/common/common_store.dart';
 import 'package:traveling_app/store/travel/travel_store.dart';
 import 'package:traveling_app/store/user/user_store.dart';
 import 'package:traveling_app/styles/buttonStyle/index.dart';
@@ -73,101 +73,102 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     return Scaffold(
-      backgroundColor: tokens.background,
+      backgroundColor: Colors.transparent,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          const TravelPlaceholderImage(
-            seed: 'login-hero',
-            radius: BorderRadius.zero,
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  tokens.background.withValues(alpha: 0.16),
-                  tokens.background.withValues(alpha: 0.56),
-                  tokens.background,
-                ],
-                stops: const [0.0, 0.55, 1.0],
-              ),
-            ),
-          ),
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final isWide = constraints.maxWidth >= 920;
                 final horizontalPadding = isWide ? 40.0 : 24.0;
-                final globeSize = isWide
-                    ? 360.0
-                    : constraints.maxWidth.clamp(300.0, 375.0).toDouble();
+                final globeWidth = isWide ? 420.0 : double.infinity;
+                final globeHeight = isWide ? 400.0 : 400.0;
+                final globeSpacerHeight = isWide ? 480.0 : 400.0;
 
-                return Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: horizontalPadding,
-                    vertical: 24,
-                  ),
-
-                  child: ScrollConfiguration(
-                    behavior: ScrollConfiguration.of(context).copyWith(
-                      scrollbars: false, // 不显示滚动条
-                      overscroll: false, // 也不显示 Android 的边缘过度滚动效果
-                      physics:
-                          const BouncingScrollPhysics(), // 可选：用 iOS 风格的弹性滚动
-                    ),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          TravelLocationIcon(
-                            location: travelStore.userLocation.city,
-                          ),
-                          const SizedBox(height: 20),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 260,
-                            child: OverflowBox(
-                              maxHeight: 338,
-                              alignment: Alignment.topCenter,
-                              child: _LoginGlobeStage(
-                                tokens: tokens,
-                                store: travelStore,
-                                globeSize: globeSize,
-                              ),
-                            ),
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _LoginHero(
-                                tokens: tokens,
-                                titleStyle: titleStyle,
-                                bodyStyle: bodyStyle,
-                                compact: true,
-                              ),
-                              const SizedBox(height: 30),
-                              _LoginCard(
-                                tokens: tokens,
-                                isSigningIn: _isSigningIn,
-                                errorMessage: _errorMessage,
-                                onGoogleSignIn: _signInWithGoogle,
-                                onContinueAsGuest: () {
-                                  UserStoreScope.of(context).login('Guest');
-                                  context.go('/explore');
-                                },
-                              ),
-                            ],
-                          ),
-                        ],
+                return Stack(
+                  fit: StackFit.expand,
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned.fill(
+                      child: Image.asset(
+                        'assets/earth_globe/2k_stars.jpg',
+                        fit: BoxFit.cover,
                       ),
                     ),
-                  ),
+                    Positioned.fill(
+                      child: TravelEarthGlobeView(
+                        size: globeWidth,
+                        width: globeWidth,
+                        height: globeHeight,
+                        backgroundSize: Size.infinite,
+                        globeAlignment: const Alignment(0, -0.65),
+                        showBackground: false,
+                        cities: travelStore.cities.take(6).toList(),
+                        userLocation: travelStore.userLocation,
+                        rotationSpeed: 0.02,
+                        maxMarkers: 6,
+                      ),
+                    ),
+                    Positioned(
+                      top: 30,
+                      left: 30,
+                      right: 0,
+                      child: TravelLocationIcon(
+                        location: travelStore.userLocation.city,
+                      ),
+                    ),
+                    ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(context).copyWith(
+                        scrollbars: false,
+                        overscroll: false,
+                        physics: const BouncingScrollPhysics(),
+                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            SizedBox(height: globeSpacerHeight),
+                            Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                horizontalPadding,
+                                24,
+                                horizontalPadding,
+                                24,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _LoginHero(
+                                    tokens: tokens,
+                                    titleStyle: titleStyle,
+                                    bodyStyle: bodyStyle,
+                                    compact: true,
+                                  ),
+                                  const SizedBox(height: 30),
+                                  _LoginCard(
+                                    tokens: tokens,
+                                    isSigningIn: _isSigningIn,
+                                    errorMessage: _errorMessage,
+                                    onGoogleSignIn: _signInWithGoogle,
+                                    onContinueAsGuest: () {
+                                      UserStoreScope.of(context).login('Guest');
+                                      context.go('/explore');
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
           ),
+          const UnityPreloader(),
         ],
       ),
     );
@@ -242,41 +243,6 @@ class _LoginHero extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _LoginGlobeStage extends StatelessWidget {
-  final AppCommon tokens;
-  final TravelStore store;
-  final double globeSize;
-
-  const _LoginGlobeStage({
-    required this.tokens,
-    required this.store,
-    required this.globeSize,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      alignment: Alignment.center,
-      children: [
-        TravelEarthGlobe(
-          size: globeSize,
-          cities: store.cities,
-          userLocation: store.userLocation,
-          userLabel: store.isLocating ? null : store.userLocation.city,
-          useUnity: true,
-          camera: const UnityGlobeCamera(
-            longitude: 115,
-            latitude: 0,
-            height: 30000000,
-          ),
-          autoRotate: true,
-        ),
-      ],
     );
   }
 }

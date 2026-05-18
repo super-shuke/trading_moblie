@@ -3,13 +3,14 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_embed_unity/flutter_embed_unity.dart';
+import 'package:traveling_app/component/travel/earthGlobe/travel_earth_globe_view.dart';
 import 'package:traveling_app/service/travel_data.dart';
 import 'package:traveling_app/styles/theme/app_common.dart';
 
 const defaultUnityGlobeConfig = <String, Object>{
   'gesturesEnabled': false,
   'autoRotateEnabled': true,
-  'autoRotateSpeed': 3,
+  'autoRotateSpeed': 1.6,
 };
 
 class UnityGlobeCamera {
@@ -40,6 +41,18 @@ class UnityGlobeCamera {
       height: height ?? this.height,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is UnityGlobeCamera &&
+            other.longitude == longitude &&
+            other.latitude == latitude &&
+            other.height == height;
+  }
+
+  @override
+  int get hashCode => Object.hash(longitude, latitude, height);
 }
 
 class UnityGlobeContainer extends StatefulWidget {
@@ -55,11 +68,11 @@ class UnityGlobeContainer extends StatefulWidget {
   final UnityGlobeCamera? camera;
 
   /// 控制是否开启 Unity 侧地球自转。
-  /// 发送 Configure 时会覆盖 config['autoRotateEnabled']。
+  /// 会覆盖 config['autoRotateEnabled']。
   final bool autoRotate;
 
-  /// 传给 Unity GlobeOverviewCamera.Configure 的配置。
-  /// 不传时默认关闭手势、开启自转、速度为 3。
+  /// 传给 Unity GlobeOverviewCamera 的配置。
+  /// 不传时默认关闭手势、开启自转、速度为 1.6。
   final Map<String, Object?> config;
 
   const UnityGlobeContainer({
@@ -84,7 +97,6 @@ class UnityGlobeContainer extends StatefulWidget {
 
 class _UnityGlobeContainerState extends State<UnityGlobeContainer> {
   static const _markerManagerObjectName = 'MarkerManager';
-  static const _orbitControllerObjectName = 'OrbitGlobeController';
   static const _globeOverviewCameraObjectName = 'GlobeOverviewCamera';
 
   bool _unityReady = false;
@@ -96,14 +108,23 @@ class _UnityGlobeContainerState extends State<UnityGlobeContainer> {
     final configChanged =
         oldWidget.autoRotate != widget.autoRotate ||
         !mapEquals(oldWidget.config, widget.config);
+    final globeStateChanged =
+        oldWidget.cities != widget.cities ||
+        oldWidget.userLocation != widget.userLocation ||
+        oldWidget.userLabel != widget.userLabel;
 
-    if (_unityReady &&
-        (oldWidget.cities != widget.cities ||
-            oldWidget.userLocation != widget.userLocation ||
-            oldWidget.userLabel != widget.userLabel ||
-            cameraChanged ||
-            configChanged)) {
-      _sendUnityState();
+    if (!_unityReady) {
+      return;
+    }
+
+    if (cameraChanged) {
+      _sendCameraState();
+    }
+    if (configChanged) {
+      _sendGlobeConfiguration();
+    }
+    if (globeStateChanged) {
+      _sendGlobeState();
     }
   }
 
@@ -134,7 +155,19 @@ class _UnityGlobeContainerState extends State<UnityGlobeContainer> {
                         onMessageFromUnity: _handleUnityMessage,
                       ),
                     )
-                  : _FallbackGlobe(tokens: tokens, size: markerBaseline),
+                  : TravelEarthGlobeView(
+                      size: markerBaseline,
+                      cities: widget.cities,
+                      userLocation: widget.userLocation,
+                      onCityTap: widget.onCityTap,
+                      autoRotate: widget.autoRotate,
+                      rotationSpeed:
+                          (_doubleConfigValue(
+                                widget.config['autoRotateSpeed'],
+                              ) ??
+                              1.6) /
+                          20,
+                    ),
               if (widget.userLabel != null)
                 Positioned(
                   bottom: markerBaseline * 0.1,
@@ -277,19 +310,76 @@ class _UnityGlobeContainerState extends State<UnityGlobeContainer> {
   }
 
   void _sendUnityState() {
-    _sendGlobeConfiguration();
     _sendCameraState();
+    _sendGlobeConfiguration();
     _sendGlobeState();
   }
 
   void _sendGlobeConfiguration() {
     final config = {...widget.config, 'autoRotateEnabled': widget.autoRotate};
 
-    sendToUnity(
-      _globeOverviewCameraObjectName,
-      'Configure',
-      jsonEncode(config),
-    );
+    final gesturesEnabled = _boolConfigValue(config['gesturesEnabled']);
+    if (gesturesEnabled != null) {
+      sendToUnity(
+        _globeOverviewCameraObjectName,
+        'SetGesturesEnabled',
+        gesturesEnabled.toString(),
+      );
+    }
+
+    final autoRotateSpeed = _doubleConfigValue(config['autoRotateSpeed']);
+    if (autoRotateSpeed != null) {
+      sendToUnity(
+        _globeOverviewCameraObjectName,
+        'SetAutoRotateSpeed',
+        autoRotateSpeed.toString(),
+      );
+    }
+
+    final autoRotateEnabled = _boolConfigValue(config['autoRotateEnabled']);
+    if (autoRotateEnabled != null) {
+      sendToUnity(
+        _globeOverviewCameraObjectName,
+        'SetAutoRotateEnabled',
+        autoRotateEnabled.toString(),
+      );
+    }
+  }
+
+  bool? _boolConfigValue(Object? value) {
+    if (value is bool) {
+      return value;
+    }
+    if (value is num) {
+      return value != 0;
+    }
+    if (value is String) {
+      switch (value.trim().toLowerCase()) {
+        case 'true':
+        case '1':
+        case 'on':
+        case 'enable':
+        case 'enabled':
+          return true;
+        case 'false':
+        case '0':
+        case 'off':
+        case 'disable':
+        case 'disabled':
+          return false;
+      }
+    }
+    return null;
+  }
+
+  double? _doubleConfigValue(Object? value) {
+    if (value is num) {
+      return value.toDouble();
+    }
+    if (value is String) {
+      return double.tryParse(value);
+    }
+    return null;
   }
 
   void _sendCameraState() {
@@ -299,7 +389,7 @@ class _UnityGlobeContainerState extends State<UnityGlobeContainer> {
     }
 
     sendToUnity(
-      _orbitControllerObjectName,
+      _globeOverviewCameraObjectName,
       'SetCamera',
       jsonEncode(camera.toJson()),
     );
@@ -330,24 +420,6 @@ class _UnityGlobeContainerState extends State<UnityGlobeContainer> {
             },
         ],
       }),
-    );
-  }
-}
-
-class _FallbackGlobe extends StatelessWidget {
-  final AppCommon tokens;
-  final double size;
-
-  const _FallbackGlobe({required this.tokens, required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Icon(
-        Icons.public,
-        size: size * 0.72,
-        color: tokens.textMuted.withValues(alpha: 0.46),
-      ),
     );
   }
 }
