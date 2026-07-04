@@ -49,7 +49,8 @@ dependencies:
   google_fonts: ^6.2.1
   flutter_embed_unity: ^2.0.0
   flutter_embed_unity_6000_0_android: ^2.0.0
-  flutter_earth_globe: ^2.2.1
+  flutter_earth_globe:
+    path: packages/flutter_earth_globe
 
 dev_dependencies:
   flutter_test:

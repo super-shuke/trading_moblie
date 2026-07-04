@@ -8,7 +8,7 @@ import 'package:flutter_embed_unity/flutter_embed_unity.dart';
 class UnityPreloader extends StatefulWidget {
   final Duration timeout;
 
-  const UnityPreloader({super.key, this.timeout = const Duration(seconds: 8)});
+  const UnityPreloader({super.key, this.timeout = const Duration(seconds: 30)});
 
   @override
   State<UnityPreloader> createState() => _UnityPreloaderState();

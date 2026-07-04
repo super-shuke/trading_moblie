@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traveling_app/views/Itinerary.dart';
 import 'package:traveling_app/views/Home.dart';
+import 'package:traveling_app/views/GlobeDemo.dart';
 import 'package:traveling_app/views/Login/login_screen.dart';
 import 'package:traveling_app/views/Profile.dart';
 import 'package:traveling_app/views/secondDetails/CityDetails.dart';
@@ -38,6 +39,12 @@ final List<Map<String, dynamic>> tabRoutes = [
 ];
 
 final List<Map<String, dynamic>> secondaryRoutes = [
+  {
+    'path': '/globe-demo',
+    'name': 'globeDemo',
+    'coverBottomBar': true,
+    'builder': (BuildContext context, GoRouterState state) => const GlobeDemo(),
+  },
   {
     'path': '/login',
     'name': 'login',

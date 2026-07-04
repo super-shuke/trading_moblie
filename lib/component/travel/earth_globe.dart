@@ -16,6 +16,8 @@ class TravelEarthGlobe extends StatelessWidget {
   final bool fillParent;
   final bool useUnity;
   final UnityGlobeCamera? camera;
+  final double minLatitude;
+  final double maxLatitude;
 
   /// 控制是否开启 Unity 侧地球自转。
   /// 会覆盖 config['autoRotateEnabled']。
@@ -37,6 +39,8 @@ class TravelEarthGlobe extends StatelessWidget {
     this.fillParent = false,
     this.useUnity = true,
     this.camera,
+    this.minLatitude = -90,
+    this.maxLatitude = 90,
     this.autoRotate = true,
     this.config = defaultUnityGlobeConfig,
   });
@@ -54,6 +58,8 @@ class TravelEarthGlobe extends StatelessWidget {
       onCityTap: onCityTap,
       useUnity: useUnity,
       camera: camera,
+      minLatitude: minLatitude,
+      maxLatitude: maxLatitude,
       autoRotate: autoRotate,
       config: config,
     );

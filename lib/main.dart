@@ -48,6 +48,24 @@ class _MyAppState extends State<MyApp> {
   final UserStore _userStore = UserStore();
   final TravelStore _travelStore = TravelStore();
   final CommonStore _commonStore = CommonStore();
+  bool _didPrecacheGlobeAssets = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didPrecacheGlobeAssets) {
+      return;
+    }
+    _didPrecacheGlobeAssets = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _precacheGlobeAssets(context);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // 2. 传给 AppProviders 进行注入
@@ -62,8 +80,15 @@ class _MyAppState extends State<MyApp> {
             onGenerateTitle: (context) => 'GeoTravel',
             routerConfig: mainRouter,
             builder: (context, child) {
+              final location = mainRouter.routeInformationProvider.value.uri;
+              final shouldPreloadUnity =
+                  location.path != '/explore' && location.path != '/globe-demo';
+
               return Stack(
-                children: [if (child != null) child, const UnityPreloader()],
+                children: [
+                  if (child != null) child,
+                  if (shouldPreloadUnity) const UnityPreloader(),
+                ],
               );
             },
             theme: AppTheme.light(),
@@ -80,5 +105,15 @@ class _MyAppState extends State<MyApp> {
         },
       ),
     );
+  }
+
+  void _precacheGlobeAssets(BuildContext context) {
+    for (final asset in const [
+      'assets/earth_globe/2k_stars.jpg',
+      'assets/earth_globe/2k_earth-day.jpg',
+      'assets/earth_globe/2k_earth-night.jpg',
+    ]) {
+      precacheImage(AssetImage(asset), context);
+    }
   }
 }

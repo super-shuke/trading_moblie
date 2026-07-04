@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traveling_app/component/travel/earthGlobe/travel_earth_globe_view.dart';
-import 'package:traveling_app/component/travel/globe/unity_preloader.dart';
+import 'package:traveling_app/component/travel/earth_globe.dart';
 import 'package:traveling_app/component/travel/kit.dart';
 import 'package:traveling_app/service/travel_data.dart';
 import 'package:traveling_app/store/travel/travel_store.dart';
@@ -37,59 +36,96 @@ class _HomeState extends State<Home> {
       backgroundColor: tokens.background,
       body: Stack(
         children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/earth_globe/2k_stars.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _Header(tokens: tokens, store: store),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            final size = constraints.maxWidth.clamp(
-                              280.0,
-                              360.0,
-                            );
-                            return Center(
-                              child: TravelEarthGlobeView(
-                                size: size,
-                                cities: cities,
-                                userLocation: store.userLocation,
-                                onCityTap: (city) {
-                                  context.push('/explore/city/${city.id}');
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        height: 88,
-                        child: ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          scrollDirection: Axis.horizontal,
-                          itemCount: cities.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(width: 12),
-                          itemBuilder: (context, index) {
-                            final city = cities[index];
-                            return _CityCard(city: city);
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const _BottomBar(),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
+                Expanded(child: _HomeGlobeStage(store: store)),
+                _HomeHotLocation(list: cities),
+                const SizedBox(height: 12),
               ],
             ),
           ),
-          // Preload Unity invisibly so deeper globe screens can open faster.
-          const UnityPreloader(),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeGlobeStage extends StatelessWidget {
+  final TravelStore store;
+
+  const _HomeGlobeStage({required this.store});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return TravelEarthGlobe(
+          width: constraints.maxWidth,
+          height: constraints.maxHeight,
+          cities: store.cities,
+          userLocation: store.userLocation,
+          useUnity: false,
+          minLatitude: -75,
+          maxLatitude: 75,
+          autoRotate: true,
+          config: const {
+            'gesturesEnabled': true,
+            'autoRotateEnabled': true,
+            'autoRotateSpeed': 1,
+          },
+          camera: const UnityGlobeCamera(
+            longitude: 0,
+            latitude: 0,
+            height: 18000000,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _HomeHotLocation extends StatelessWidget {
+  final List<City> list;
+
+  const _HomeHotLocation({required this.list});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 180,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(color: Colors.transparent),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const TravelLabel('HOT LOCATIONS'),
+              GestureDetector(
+                onTap: () => context.push('/explore'),
+                child: const TravelLabel('SEE ALL →'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: list.length,
+              separatorBuilder: (context, index) => const SizedBox(width: 12),
+              itemBuilder: (context, index) => _CityCard(city: list[index]),
+            ),
+          ),
         ],
       ),
     );
@@ -159,66 +195,49 @@ class _CityCard extends StatelessWidget {
       onTap: () => context.push('/explore/city/${city.id}'),
       borderRadius: BorderRadius.circular(tokens.radiusLg),
       child: Container(
-        width: 220,
-        padding: const EdgeInsets.all(12),
+        width: 130,
+        height: 140,
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: tokens.surface,
           borderRadius: BorderRadius.circular(tokens.radiusLg),
-          border: Border.all(color: tokens.border),
         ),
-        child: Row(
+        child: Column(
           children: [
             TravelPlaceholderImage(
               seed: city.heroImageRef,
-              width: 56,
-              height: 56,
-              radius: BorderRadius.circular(tokens.radiusMd),
+              width: double.infinity,
+              height: 76,
+              radius: BorderRadius.zero,
             ),
-            const SizedBox(width: 12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    city.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: tokens.textPrimary,
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(color: tokens.surface),
+                padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${city.name}, ${city.country}',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 8,
+                        color: tokens.textMuted,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  TravelLabel('${city.poiCount} places · ${city.country}'),
-                ],
+                    Text(
+                      city.name,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _BottomBar extends StatelessWidget {
-  const _BottomBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () => context.go('/itinerary'),
-              icon: const Icon(Icons.calendar_month_outlined),
-              label: const Text('Plan a Trip'),
-            ),
-          ),
-          const SizedBox(width: 12),
-          OutlinedButton(onPressed: () {}, child: const Text('Search')),
-        ],
       ),
     );
   }

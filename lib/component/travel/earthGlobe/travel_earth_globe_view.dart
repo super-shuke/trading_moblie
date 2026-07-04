@@ -60,6 +60,11 @@ class TravelEarthGlobeView extends StatefulWidget {
   /// 城市 marker 点击回调。当为 null 时禁用 marker 点击 + 禁用缩放。
   final void Function(City city)? onCityTap;
 
+  /// 是否允许用户手势操作地球。
+  ///
+  /// 关闭后会屏蔽拖拽、缩放以及 marker 点击，适合登录页这类装饰地球。
+  final bool gesturesEnabled;
+
   // ─── 行为 ───────────────────────────────────────────
 
   /// 是否自动旋转。
@@ -90,8 +95,56 @@ class TravelEarthGlobeView extends StatefulWidget {
   ///   - `Alignment(0, -0.5)` 偏上一半
   final Alignment globeAlignment;
 
+  /// 地球在自身渲染容器里的对齐方式。
+  ///
+  /// 这个值会传给 [FlutterEarthGlobe.alignment]。如果设置成偏上，
+  /// 第三方组件内部的 Stack 可能会裁掉大气光晕。
+  final Alignment sphereAlignment;
+
+  /// 给第三方地球组件的内部渲染区域额外留白，避免光晕被组件边界裁剪。
+  final EdgeInsets spherePadding;
+
   /// 是否显示星空背景图。关闭后底色是透明的（适合放在已有背景上）。
   final bool showBackground;
+
+  /// 是否启用昼夜明暗。关闭后更接近 Google Maps 卫星图的清晰地球预览。
+  final bool dayNightCycleEnabled;
+
+  /// 是否启用表面光照。
+  final bool surfaceLightingEnabled;
+
+  /// 表面光照强度。
+  final double lightIntensity;
+
+  /// 环境光强度。值越高，暗面越少。
+  final double ambientLight;
+
+  /// 用户上下拖动时允许到达的最小纬度。
+  final double minLatitude;
+
+  /// 用户上下拖动时允许到达的最大纬度。
+  final double maxLatitude;
+
+  /// 大气层透明度。
+  final double atmosphereOpacity;
+
+  /// 大气层厚度。
+  final double atmosphereThickness;
+
+  /// 大气层模糊。
+  final double atmosphereBlur;
+
+  /// 球体外发光颜色。
+  final Color shadowColor;
+
+  /// 球体外发光模糊。
+  final double shadowBlurSigma;
+
+  /// 是否叠加球面暗角/高光渐变。
+  final bool showGradientOverlay;
+
+  /// 球面暗角/高光渐变。
+  final Gradient gradientOverlay;
 
   const TravelEarthGlobeView({
     super.key,
@@ -102,13 +155,33 @@ class TravelEarthGlobeView extends StatefulWidget {
     required this.cities,
     required this.userLocation,
     this.onCityTap,
+    this.gesturesEnabled = true,
     this.autoRotate = true,
     this.rotationSpeed = 0.08,
     this.maxMarkers = 18,
     this.showLabels = false,
     this.zoom = 0,
     this.globeAlignment = Alignment.center,
+    this.sphereAlignment = const Alignment(0, -0.55),
+    this.spherePadding = EdgeInsets.zero,
     this.showBackground = true,
+    this.dayNightCycleEnabled = true,
+    this.surfaceLightingEnabled = true,
+    this.lightIntensity = 0.72,
+    this.ambientLight = 0.58,
+    this.minLatitude = -90,
+    this.maxLatitude = 90,
+    this.atmosphereOpacity = 0.28,
+    this.atmosphereThickness = 0.04,
+    this.atmosphereBlur = 30,
+    this.shadowColor = const Color(0x663AA8FF),
+    this.shadowBlurSigma = 22,
+    this.showGradientOverlay = true,
+    this.gradientOverlay = const RadialGradient(
+      center: Alignment(-0.32, -0.36),
+      colors: [Colors.transparent, Color(0x08000000), Color(0x52000000)],
+      stops: [0.08, 0.62, 1.0],
+    ),
   });
 
   @override
@@ -142,38 +215,35 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
       zoom: widget.zoom,
       minZoom: -0.6, // 最小缩放（最远）
       maxZoom: 1.4, // 最大缩放（最近）
-      isZoomEnabled: widget.onCityTap != null, // 只有可点击时才允许缩放
+      isZoomEnabled:
+          widget.gesturesEnabled && widget.onCityTap != null, // 只有可交互时才允许缩放
       panSensitivity: 0.75, // 拖拽灵敏度
+      minLatitude: widget.minLatitude,
+      maxLatitude: widget.maxLatitude,
       zoomSensitivity: 0.55, // 缩放灵敏度
       // ─── 大气层 ───────────────────────────────────────
       showAtmosphere: true,
-      atmosphereOpacity: 0.28, // 透明度（0 全透 ~ 1 不透）
-      atmosphereThickness: 0.04, // 大气厚度
-      atmosphereBlur: 30, // 模糊度（越大越柔和）
+      atmosphereOpacity: widget.atmosphereOpacity, // 透明度（0 全透 ~ 1 不透）
+      atmosphereThickness: widget.atmosphereThickness, // 大气厚度
+      atmosphereBlur: widget.atmosphereBlur, // 模糊度（越大越柔和）
       // ─── 光照 ─────────────────────────────────────────
-      surfaceLightingEnabled: true,
+      surfaceLightingEnabled: widget.surfaceLightingEnabled,
       lightAngle: -35, // 光源角度（度数）
-      lightIntensity: 0.72, // 光照强度
-      ambientLight: 0.58, // 环境光（决定阴影区有多亮）
+      lightIntensity: widget.lightIntensity, // 光照强度
+      ambientLight: widget.ambientLight, // 环境光（决定阴影区有多亮）
       // ─── 昼夜循环 ─────────────────────────────────────
-      isDayNightCycleEnabled: true,
+      isDayNightCycleEnabled: widget.dayNightCycleEnabled,
       dayNightMode: DayNightMode.simulated, // 模拟的昼夜（不依赖真实时间）
       simulatedNightColor: const Color(0xFF081326),
-      simulatedNightIntensity: 0.24, // 夜晚区域有多暗
+      simulatedNightIntensity: widget.dayNightCycleEnabled
+          ? 0.24
+          : 0, // 夜晚区域有多暗
       // ─── 球体样式（阴影 + 渐变叠加） ────────────────────
-      sphereStyle: const SphereStyle(
-        shadowColor: Color(0x663AA8FF), // 球体外发光颜色（蓝色）
-        shadowBlurSigma: 22, // 发光模糊度
-        showGradientOverlay: true, // 是否叠加渐变滤镜
-        gradientOverlay: RadialGradient(
-          center: Alignment(-0.32, -0.36), // 高光中心位置（左上）
-          colors: [
-            Colors.transparent,
-            Color(0x08000000),
-            Color(0x52000000), // 边缘变暗的程度
-          ],
-          stops: [0.08, 0.62, 1.0],
-        ),
+      sphereStyle: SphereStyle(
+        shadowColor: widget.shadowColor, // 球体外发光颜色（蓝色）
+        shadowBlurSigma: widget.shadowBlurSigma, // 发光模糊度
+        showGradientOverlay: widget.showGradientOverlay, // 是否叠加渐变滤镜
+        gradientOverlay: widget.gradientOverlay,
       ),
     );
   }
@@ -197,8 +267,15 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
     if (oldWidget.cities != widget.cities ||
         oldWidget.userLocation != widget.userLocation ||
         oldWidget.showLabels != widget.showLabels ||
-        oldWidget.maxMarkers != widget.maxMarkers) {
+        oldWidget.maxMarkers != widget.maxMarkers ||
+        oldWidget.gesturesEnabled != widget.gesturesEnabled) {
       _syncPoints();
+    }
+
+    if (oldWidget.gesturesEnabled != widget.gesturesEnabled ||
+        oldWidget.onCityTap != widget.onCityTap) {
+      _controller.isZoomEnabled =
+          widget.gesturesEnabled && widget.onCityTap != null;
     }
 
     // 旋转相关属性变化时，重新启动/停止旋转。
@@ -256,18 +333,39 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
 
   /// 渲染地球本身。
   Widget _globe() {
+    final canvasWidth = _globeWidth + widget.spherePadding.horizontal;
+    final canvasHeight = _globeHeight + widget.spherePadding.vertical;
+    final globe = SizedBox(
+      width: canvasWidth,
+      height: canvasHeight,
+      child: IgnorePointer(
+        ignoring: !widget.gesturesEnabled,
+        child: FlutterEarthGlobe(
+          controller: _controller,
+          radius: _globeRadius,
+          // 球在自己的渲染容器里的位置。
+          // 这是包内部参数（注意区别于上面的 globeAlignment）：
+          //   - globeAlignment → 在外层"舞台"里的位置（模式 A 才用）
+          //   - 这里的 alignment → 球在 FlutterEarthGlobe 内部 Stack 里的位置
+          alignment: widget.sphereAlignment,
+        ),
+      ),
+    );
+
+    if (widget.spherePadding == EdgeInsets.zero) {
+      return SizedBox(width: _globeWidth, height: _globeHeight, child: globe);
+    }
+
     return SizedBox(
       width: _globeWidth,
       height: _globeHeight,
-      child: FlutterEarthGlobe(
-        controller: _controller,
-        radius: _globeRadius,
-        // 球在自己的 _globeWidth × _globeHeight 容器里的对齐方式。
-        //
-        // 这是包内部参数（注意区别于上面的 globeAlignment）：
-        //   - globeAlignment → 在外层"舞台"里的位置（模式 A 才用）
-        //   - 这里的 alignment → 球在自己 SizedBox 里的位置
-        alignment: const Alignment(0, -0.55),
+      child: OverflowBox(
+        alignment: Alignment.topCenter,
+        minWidth: canvasWidth,
+        maxWidth: canvasWidth,
+        minHeight: canvasHeight,
+        maxHeight: canvasHeight,
+        child: globe,
       ),
     );
   }
@@ -278,7 +376,7 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
   double get _globeWidth => widget.width ?? widget.size!;
 
   /// 组件实际高度：优先用 [height]，否则用正方形 [size]。
-  double get _globeHeight => widget.height?? widget.size!;
+  double get _globeHeight => widget.height ?? widget.size!;
 
   /// 地球物理半径 = 宽高较小值的一半。
   ///

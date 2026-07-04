@@ -19,10 +19,6 @@ class ItineraryView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: tokens.background,
         surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/explore'),
-        ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

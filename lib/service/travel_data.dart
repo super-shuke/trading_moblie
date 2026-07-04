@@ -110,6 +110,35 @@ class Poi {
   });
 }
 
+@immutable
+class LocalPlace {
+  final String id;
+  final String cityId;
+  final String name;
+  final String category;
+  final LatLng location;
+  final String shortDescription;
+  final double rating;
+  final int reviewCount;
+  final String priceLevel;
+  final List<String> tags;
+  final String coverImageRef;
+
+  const LocalPlace({
+    required this.id,
+    required this.cityId,
+    required this.name,
+    required this.category,
+    required this.location,
+    required this.shortDescription,
+    required this.rating,
+    required this.reviewCount,
+    required this.priceLevel,
+    required this.tags,
+    required this.coverImageRef,
+  });
+}
+
 enum TipKind { positive, neutral, avoid }
 
 @immutable
@@ -337,6 +366,245 @@ class TravelMockData {
       coverImageRef: 'castelo',
     ),
   ];
+
+  static const shops = <LocalPlace>[
+    LocalPlace(
+      id: 'lisbon_shop_vida_portuguesa',
+      cityId: 'lisbon',
+      name: 'A Vida Portuguesa',
+      category: 'shop',
+      location: LatLng(38.7118, -9.1415),
+      shortDescription:
+          'Portuguese-made soaps, tins, notebooks, ceramics, and classic gifts.',
+      rating: 4.7,
+      reviewCount: 1840,
+      priceLevel: r'$$',
+      tags: ['gifts', 'design', 'local goods'],
+      coverImageRef: 'shop_vida_portuguesa',
+    ),
+    LocalPlace(
+      id: 'lisbon_shop_embaixada',
+      cityId: 'lisbon',
+      name: 'Embaixada',
+      category: 'shop',
+      location: LatLng(38.7167, -9.1479),
+      shortDescription:
+          'Independent fashion and lifestyle stores inside a neo-Moorish palace.',
+      rating: 4.5,
+      reviewCount: 920,
+      priceLevel: r'$$$',
+      tags: ['fashion', 'concept store', 'architecture'],
+      coverImageRef: 'shop_embaixada',
+    ),
+    LocalPlace(
+      id: 'tokyo_shop_beams_japan',
+      cityId: 'tokyo',
+      name: 'Beams Japan',
+      category: 'shop',
+      location: LatLng(35.6929, 139.7045),
+      shortDescription:
+          'Multi-floor edit of Japanese clothing, crafts, homeware, and souvenirs.',
+      rating: 4.6,
+      reviewCount: 2450,
+      priceLevel: r'$$$',
+      tags: ['fashion', 'craft', 'souvenirs'],
+      coverImageRef: 'shop_beams_japan',
+    ),
+    LocalPlace(
+      id: 'tokyo_shop_loft_shibuya',
+      cityId: 'tokyo',
+      name: 'Shibuya Loft',
+      category: 'shop',
+      location: LatLng(35.6602, 139.6995),
+      shortDescription:
+          'Stationery, beauty, kitchen tools, travel gear, and playful daily goods.',
+      rating: 4.4,
+      reviewCount: 5120,
+      priceLevel: r'$$',
+      tags: ['stationery', 'lifestyle', 'gifts'],
+      coverImageRef: 'shop_shibuya_loft',
+    ),
+    LocalPlace(
+      id: 'reykjavik_shop_kraum',
+      cityId: 'reykjavik',
+      name: 'Kraum',
+      category: 'shop',
+      location: LatLng(64.1477, -21.9399),
+      shortDescription:
+          'Icelandic design store with wool, ceramics, jewelry, and home objects.',
+      rating: 4.5,
+      reviewCount: 610,
+      priceLevel: r'$$$',
+      tags: ['icelandic design', 'wool', 'homeware'],
+      coverImageRef: 'shop_kraum',
+    ),
+  ];
+
+  static const restaurants = <LocalPlace>[
+    LocalPlace(
+      id: 'lisbon_restaurant_cervejaria_ramiro',
+      cityId: 'lisbon',
+      name: 'Cervejaria Ramiro',
+      category: 'restaurant',
+      location: LatLng(38.7201, -9.1351),
+      shortDescription:
+          'Classic seafood beer hall known for prawns, crab, clams, and steak sandwiches.',
+      rating: 4.6,
+      reviewCount: 15400,
+      priceLevel: r'$$$',
+      tags: ['seafood', 'classic', 'busy'],
+      coverImageRef: 'restaurant_ramiro',
+    ),
+    LocalPlace(
+      id: 'lisbon_restaurant_taberna_rua_flores',
+      cityId: 'lisbon',
+      name: 'Taberna da Rua das Flores',
+      category: 'restaurant',
+      location: LatLng(38.7095, -9.1458),
+      shortDescription:
+          'Small Portuguese tavern with a daily-changing blackboard menu.',
+      rating: 4.5,
+      reviewCount: 2600,
+      priceLevel: r'$$',
+      tags: ['portuguese', 'small plates', 'walk-in'],
+      coverImageRef: 'restaurant_rua_flores',
+    ),
+    LocalPlace(
+      id: 'tokyo_restaurant_tsuta',
+      cityId: 'tokyo',
+      name: 'Japanese Soba Noodles Tsuta',
+      category: 'restaurant',
+      location: LatLng(35.6695, 139.7064),
+      shortDescription:
+          'Refined ramen bowls with truffle aroma, clear broths, and precise noodles.',
+      rating: 4.4,
+      reviewCount: 3900,
+      priceLevel: r'$$',
+      tags: ['ramen', 'casual', 'noodles'],
+      coverImageRef: 'restaurant_tsuta',
+    ),
+    LocalPlace(
+      id: 'tokyo_restaurant_sushi_masuda',
+      cityId: 'tokyo',
+      name: 'Sushi Masuda',
+      category: 'restaurant',
+      location: LatLng(35.6656, 139.7161),
+      shortDescription:
+          'Omakase sushi counter focused on clean seasoning and careful rice temperature.',
+      rating: 4.7,
+      reviewCount: 980,
+      priceLevel: r'$$$$',
+      tags: ['sushi', 'omakase', 'reservation'],
+      coverImageRef: 'restaurant_masuda',
+    ),
+    LocalPlace(
+      id: 'reykjavik_restaurant_grillmarkadurinn',
+      cityId: 'reykjavik',
+      name: 'Grillmarkadurinn',
+      category: 'restaurant',
+      location: LatLng(64.1472, -21.9385),
+      shortDescription:
+          'Modern Icelandic grill with lamb, seafood, and a polished dining room.',
+      rating: 4.6,
+      reviewCount: 3400,
+      priceLevel: r'$$$',
+      tags: ['icelandic', 'grill', 'dinner'],
+      coverImageRef: 'restaurant_grillmarkadurinn',
+    ),
+  ];
+
+  static const bakeries = <LocalPlace>[
+    LocalPlace(
+      id: 'lisbon_bakery_manteigaria',
+      cityId: 'lisbon',
+      name: 'Manteigaria',
+      category: 'bakery',
+      location: LatLng(38.7085, -9.1434),
+      shortDescription:
+          'Warm pasteis de nata from an open bakery counter near Chiado.',
+      rating: 4.8,
+      reviewCount: 12600,
+      priceLevel: r'$',
+      tags: ['pastel de nata', 'quick stop', 'sweet'],
+      coverImageRef: 'bakery_manteigaria',
+    ),
+    LocalPlace(
+      id: 'lisbon_bakery_pao_pao_queijo_queijo',
+      cityId: 'lisbon',
+      name: 'Pao Pao Queijo Queijo',
+      category: 'bakery',
+      location: LatLng(38.6974, -9.2058),
+      shortDescription:
+          'Casual Belem stop for sandwiches, pastries, and fresh bread.',
+      rating: 4.4,
+      reviewCount: 2100,
+      priceLevel: r'$',
+      tags: ['bread', 'sandwiches', 'casual'],
+      coverImageRef: 'bakery_pao_queijo',
+    ),
+    LocalPlace(
+      id: 'tokyo_bakery_centre_the_bakery',
+      cityId: 'tokyo',
+      name: 'Centre The Bakery',
+      category: 'bakery',
+      location: LatLng(35.6722, 139.7668),
+      shortDescription:
+          'Ginza bakery known for soft shokupan and toast-focused cafe plates.',
+      rating: 4.3,
+      reviewCount: 2700,
+      priceLevel: r'$$',
+      tags: ['shokupan', 'toast', 'cafe'],
+      coverImageRef: 'bakery_centre',
+    ),
+    LocalPlace(
+      id: 'tokyo_bakery_kayaba',
+      cityId: 'tokyo',
+      name: 'Kayaba Bakery',
+      category: 'bakery',
+      location: LatLng(35.7214, 139.7705),
+      shortDescription:
+          'Neighborhood bakery near Yanaka with simple breads and morning pastries.',
+      rating: 4.4,
+      reviewCount: 880,
+      priceLevel: r'$',
+      tags: ['local', 'morning', 'bread'],
+      coverImageRef: 'bakery_kayaba',
+    ),
+    LocalPlace(
+      id: 'reykjavik_bakery_braud_co',
+      cityId: 'reykjavik',
+      name: 'Braud & Co',
+      category: 'bakery',
+      location: LatLng(64.1429, -21.9286),
+      shortDescription:
+          'Colorful bakery famous for cinnamon rolls, sourdough, and morning queues.',
+      rating: 4.7,
+      reviewCount: 4800,
+      priceLevel: r'$$',
+      tags: ['cinnamon rolls', 'sourdough', 'breakfast'],
+      coverImageRef: 'bakery_braud_co',
+    ),
+  ];
+
+  static List<LocalPlace> shopsForCity(String cityId) {
+    return shops.where((place) => place.cityId == cityId).toList();
+  }
+
+  static List<LocalPlace> restaurantsForCity(String cityId) {
+    return restaurants.where((place) => place.cityId == cityId).toList();
+  }
+
+  static List<LocalPlace> bakeriesForCity(String cityId) {
+    return bakeries.where((place) => place.cityId == cityId).toList();
+  }
+
+  static List<LocalPlace> localPlacesForCity(String cityId) {
+    return [
+      ...shopsForCity(cityId),
+      ...restaurantsForCity(cityId),
+      ...bakeriesForCity(cityId),
+    ];
+  }
 
   static List<Poi> poisForCity(String cityId) {
     return _pois.where((poi) => poi.cityId == cityId).toList();

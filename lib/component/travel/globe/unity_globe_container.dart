@@ -66,6 +66,8 @@ class UnityGlobeContainer extends StatefulWidget {
   final void Function(City city)? onCityTap;
   final bool useUnity;
   final UnityGlobeCamera? camera;
+  final double minLatitude;
+  final double maxLatitude;
 
   /// 控制是否开启 Unity 侧地球自转。
   /// 会覆盖 config['autoRotateEnabled']。
@@ -87,6 +89,8 @@ class UnityGlobeContainer extends StatefulWidget {
     this.fillParent = false,
     this.useUnity = true,
     this.camera,
+    this.minLatitude = -90,
+    this.maxLatitude = 90,
     this.autoRotate = true,
     this.config = defaultUnityGlobeConfig,
   });
@@ -160,6 +164,13 @@ class _UnityGlobeContainerState extends State<UnityGlobeContainer> {
                       cities: widget.cities,
                       userLocation: widget.userLocation,
                       onCityTap: widget.onCityTap,
+                      gesturesEnabled:
+                          _boolConfigValue(
+                            widget.config['gesturesEnabled'],
+                          ) ??
+                          true,
+                      minLatitude: widget.minLatitude,
+                      maxLatitude: widget.maxLatitude,
                       autoRotate: widget.autoRotate,
                       rotationSpeed:
                           (_doubleConfigValue(
@@ -251,7 +262,13 @@ class _UnityGlobeContainerState extends State<UnityGlobeContainer> {
 
   void _handleUnityMessage(String message) {
     if (_isUnityReadyMessage(message)) {
-      _unityReady = true;
+      if (mounted && !_unityReady) {
+        setState(() {
+          _unityReady = true;
+        });
+      } else {
+        _unityReady = true;
+      }
       _sendUnityState();
       return;
     }

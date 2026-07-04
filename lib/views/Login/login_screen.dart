@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traveling_app/component/travel/earthGlobe/travel_earth_globe_view.dart';
-import 'package:traveling_app/component/travel/globe/unity_preloader.dart';
 import 'package:traveling_app/component/travel/kit.dart';
 import 'package:traveling_app/service/google_auth_service.dart';
 import 'package:traveling_app/store/travel/travel_store.dart';
@@ -148,6 +147,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     tokens: tokens,
                                     isSigningIn: _isSigningIn,
                                     errorMessage: _errorMessage,
+                                    onPreviewGlobeDemo: () {
+                                      context.push('/globe-demo');
+                                    },
                                     onGoogleSignIn: _signInWithGoogle,
                                     onContinueAsGuest: () {
                                       UserStoreScope.of(context).login('Guest');
@@ -166,7 +168,6 @@ class _LoginScreenState extends State<LoginScreen> {
               },
             ),
           ),
-          const UnityPreloader(),
         ],
       ),
     );
@@ -251,6 +252,7 @@ class _LoginCard extends StatelessWidget {
   final String? errorMessage;
   final VoidCallback onGoogleSignIn;
   final VoidCallback onContinueAsGuest;
+  final VoidCallback onPreviewGlobeDemo;
 
   const _LoginCard({
     required this.tokens,
@@ -258,6 +260,7 @@ class _LoginCard extends StatelessWidget {
     required this.errorMessage,
     required this.onGoogleSignIn,
     required this.onContinueAsGuest,
+    required this.onPreviewGlobeDemo,
   });
 
   @override
@@ -337,6 +340,15 @@ class _LoginCard extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 height: 1.4,
               ),
+            ),
+          ),
+          SizedBox(
+            width: double.infinity,
+            height: 42,
+            child: TextButton.icon(
+              onPressed: onPreviewGlobeDemo,
+              icon: const Icon(Icons.public, size: 18),
+              label: const Text('Preview globe demo'),
             ),
           ),
           if (errorMessage != null) ...[
