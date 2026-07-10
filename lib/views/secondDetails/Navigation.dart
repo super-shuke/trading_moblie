@@ -21,7 +21,7 @@ class NavigationView extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: tokens.background,
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           Positioned.fill(

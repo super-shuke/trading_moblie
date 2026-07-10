@@ -29,7 +29,7 @@ class _GlobeDemoState extends State<GlobeDemo> {
     final cities = store.cities.take(10).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF030712),
+      backgroundColor: Colors.transparent,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -56,34 +56,34 @@ class _GlobeDemoState extends State<GlobeDemo> {
                       top: 16,
                       child: _TopBar(tokens: tokens),
                     ),
-                    // Positioned(
-                    //   left: 20,
-                    //   right: 20,
-                    //   bottom: compact ? 20 : 28,
-                    //   child: compact
-                    //       ? _BottomSheetControls(
-                    //           layer: _layer,
-                    //           autoRotate: _autoRotate,
-                    //           cities: cities,
-                    //           onLayerChanged: (layer) {
-                    //             setState(() => _layer = layer);
-                    //           },
-                    //           onAutoRotateChanged: (value) {
-                    //             setState(() => _autoRotate = value);
-                    //           },
-                    //         )
-                    //       : _DesktopControls(
-                    //           layer: _layer,
-                    //           autoRotate: _autoRotate,
-                    //           cities: cities,
-                    //           onLayerChanged: (layer) {
-                    //             setState(() => _layer = layer);
-                    //           },
-                    //           onAutoRotateChanged: (value) {
-                    //             setState(() => _autoRotate = value);
-                    //           },
-                    //         ),
-                    // ),
+                    Positioned(
+                      left: 20,
+                      right: 20,
+                      bottom: compact ? 20 : 28,
+                      child: compact
+                          ? _BottomSheetControls(
+                              layer: _layer,
+                              autoRotate: _autoRotate,
+                              cities: cities,
+                              onLayerChanged: (layer) {
+                                setState(() => _layer = layer);
+                              },
+                              onAutoRotateChanged: (value) {
+                                setState(() => _autoRotate = value);
+                              },
+                            )
+                          : _DesktopControls(
+                              layer: _layer,
+                              autoRotate: _autoRotate,
+                              cities: cities,
+                              onLayerChanged: (layer) {
+                                setState(() => _layer = layer);
+                              },
+                              onAutoRotateChanged: (value) {
+                                setState(() => _autoRotate = value);
+                              },
+                            ),
+                    ),
                   ],
                 );
               },
@@ -137,36 +137,36 @@ class _GlobeStage extends StatelessWidget {
                 child: ColorFiltered(
                   colorFilter: _layerFilter(layer),
                   child: TravelEarthGlobeView(
-                  size: size,
-                  showBackground: false,
-                  cities: cities,
-                  userLocation: userLocation,
-                  onCityTap: onCityTap,
-                  autoRotate: autoRotate,
-                  rotationSpeed: 0.035,
-                  maxMarkers: cities.length,
-                  showLabels: layer == _GlobeDemoLayer.hybrid,
-                  zoom: compact ? -0.06 : 0.02,
-                  sphereAlignment: Alignment.center,
-                  spherePadding: EdgeInsets.all(compact ? 20 : 36),
-                  dayNightCycleEnabled: false,
-                  surfaceLightingEnabled: false,
-                  lightIntensity: 0,
-                  ambientLight: 1,
-                  atmosphereOpacity: 0.18,
-                  atmosphereThickness: 0.026,
-                  atmosphereBlur: 18,
-                  shadowColor: const Color(0x3338BDF8),
-                  shadowBlurSigma: 14,
-                  showGradientOverlay: true,
-                  gradientOverlay: RadialGradient(
-                    center: const Alignment(-0.18, -0.24),
-                    colors: [
-                      Colors.white.withValues(alpha: 0.04),
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.16),
-                    ],
-                    stops: const [0, 0.58, 1],
+                    size: size,
+                    showBackground: false,
+                    cities: cities,
+                    userLocation: userLocation,
+                    onCityTap: onCityTap,
+                    autoRotate: autoRotate,
+                    rotationSpeed: 0.035,
+                    maxMarkers: cities.length,
+                    showLabels: layer == _GlobeDemoLayer.hybrid,
+                    zoom: compact ? -0.06 : 0.02,
+                    sphereAlignment: Alignment.center,
+                    spherePadding: EdgeInsets.all(compact ? 20 : 36),
+                    dayNightCycleEnabled: false,
+                    surfaceLightingEnabled: false,
+                    lightIntensity: 0,
+                    ambientLight: 1,
+                    atmosphereOpacity: 0.18,
+                    atmosphereThickness: 0.026,
+                    atmosphereBlur: 18,
+                    shadowColor: const Color(0x3338BDF8),
+                    shadowBlurSigma: 14,
+                    showGradientOverlay: true,
+                    gradientOverlay: RadialGradient(
+                      center: const Alignment(-0.18, -0.24),
+                      colors: [
+                        Colors.white.withValues(alpha: 0.04),
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.16),
+                      ],
+                      stops: const [0, 0.58, 1],
                     ),
                   ),
                 ),
@@ -424,37 +424,41 @@ class _LayerChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
+    return Material(
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(999),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 160),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected
-              ? const Color(0xFF38BDF8).withValues(alpha: 0.24)
-              : Colors.white.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
             color: selected
-                ? const Color(0xFF7DD3FC)
-                : Colors.white.withValues(alpha: 0.12),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 15, color: Colors.white),
-            const SizedBox(width: 7),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
+                ? const Color(0xFF38BDF8).withValues(alpha: 0.24)
+                : Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(
+              color: selected
+                  ? const Color(0xFF7DD3FC)
+                  : Colors.white.withValues(alpha: 0.12),
             ),
-          ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 15, color: Colors.white),
+              const SizedBox(width: 7),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -487,57 +491,67 @@ class _CityTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => context.push('/explore/city/${city.id}'),
+    return Material(
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: 168,
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
-        ),
-        child: Row(
-          children: [
-            TravelPlaceholderImage(
-              seed: city.heroImageRef,
-              width: 58,
-              height: 68,
-              radius: BorderRadius.circular(12),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    city.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    city.country,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.white60, fontSize: 11),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${city.poiCount} places',
-                    style: const TextStyle(color: Colors.white54, fontSize: 10),
-                  ),
-                ],
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push('/explore/city/${city.id}'),
+        child: Container(
+          width: 168,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
+          ),
+          child: Row(
+            children: [
+              TravelPlaceholderImage(
+                seed: city.heroImageRef,
+                width: 58,
+                height: 68,
+                radius: BorderRadius.circular(12),
               ),
-            ),
-          ],
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      city.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      city.country,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${city.poiCount} places',
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

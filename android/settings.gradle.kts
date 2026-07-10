@@ -24,12 +24,3 @@ plugins {
 }
 
 include(":app")
-
-val unityLibraryDir = file("./unityLibrary")
-if (
-    unityLibraryDir.resolve("build.gradle").exists() ||
-    unityLibraryDir.resolve("build.gradle.kts").exists()
-) {
-    include(":unityLibrary")
-    project(":unityLibrary").projectDir = unityLibraryDir
-}

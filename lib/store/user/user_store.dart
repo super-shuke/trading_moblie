@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 class UserStore extends ChangeNotifier {
   String _username = 'Explorer';
   String _email = '';
+  String _bio = '';
   bool _isLoggedIn = false;
 
   String get username => _username;
   String get email => _email;
+  String get bio => _bio;
   bool get isLoggedIn => _isLoggedIn;
 
   void login(String name, {String email = ''}) {
@@ -16,9 +18,18 @@ class UserStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateProfile({required String name, String? email, String? bio}) {
+    _username = name;
+    if (email != null) _email = email;
+    if (bio != null) _bio = bio;
+    _isLoggedIn = true;
+    notifyListeners();
+  }
+
   void logout() {
     _username = 'Guest';
     _email = '';
+    _bio = '';
     _isLoggedIn = false;
     notifyListeners();
   }

@@ -89,13 +89,18 @@ class _FilterPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).extension<AppCommon>()!;
     final color = activeColor ?? tokens.brand;
-    return GestureDetector(
-      onTap: onTap,
-      child: TravelPill(
-        text: label,
-        fillColor: active ? color : Colors.transparent,
-        borderColor: active ? color : tokens.border,
-        textColor: active ? tokens.background : tokens.textPrimary,
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(999),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: TravelPill(
+          text: label,
+          fillColor: active ? color : Colors.transparent,
+          borderColor: active ? color : tokens.border,
+          textColor: active ? tokens.background : tokens.textPrimary,
+        ),
       ),
     );
   }

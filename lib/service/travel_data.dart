@@ -365,6 +365,109 @@ class TravelMockData {
       bestTimeOfDay: ['morning'],
       coverImageRef: 'castelo',
     ),
+    Poi(
+      id: 'senso_ji_temple',
+      cityId: 'tokyo',
+      name: 'Senso-ji Temple',
+      category: 'temple',
+      location: LatLng(35.7148, 139.7967),
+      shortDescription: 'An early-morning temple walk through old Asakusa.',
+      longDescription:
+          'Tokyo’s oldest temple is most memorable before the shopping street fills. '
+          'Arrive early, move slowly through the gates, and leave time for the quiet side lanes.',
+      rating: MultiRating(
+        atmosphere: 4.8,
+        photos: 4.7,
+        crowds: 4.3,
+        access: 4.8,
+      ),
+      tipCount: 9821,
+      bestTimeOfDay: ['sunrise', 'early morning'],
+      coverImageRef: 'senso_ji',
+    ),
+    Poi(
+      id: 'teamlab_planets',
+      cityId: 'tokyo',
+      name: 'teamLab Planets',
+      category: 'museum',
+      location: LatLng(35.6491, 139.7898),
+      shortDescription:
+          'Immersive rooms built from light, water, and movement.',
+      longDescription:
+          'A sequence of large-scale installations that asks visitors to move barefoot '
+          'through water, mirrored rooms, and changing fields of light.',
+      rating: MultiRating(
+        atmosphere: 4.9,
+        photos: 4.9,
+        crowds: 4.0,
+        access: 4.5,
+      ),
+      tipCount: 6204,
+      bestTimeOfDay: ['weekday morning'],
+      coverImageRef: 'teamlab_planets',
+    ),
+    Poi(
+      id: 'shinjuku_gyoen',
+      cityId: 'tokyo',
+      name: 'Shinjuku Gyoen',
+      category: 'nature',
+      location: LatLng(35.6852, 139.7101),
+      shortDescription: 'A spacious garden pause between dense neighborhoods.',
+      longDescription:
+          'Formal gardens, broad lawns, and a greenhouse create an easy half-day reset. '
+          'Bring something to read and avoid treating it as another checklist stop.',
+      rating: MultiRating(
+        atmosphere: 4.8,
+        photos: 4.7,
+        crowds: 3.2,
+        access: 4.6,
+      ),
+      tipCount: 7910,
+      bestTimeOfDay: ['morning', 'late afternoon'],
+      coverImageRef: 'shinjuku_gyoen',
+    ),
+    Poi(
+      id: 'tsukiji_outer_market',
+      cityId: 'tokyo',
+      name: 'Tsukiji Outer Market',
+      category: 'food',
+      location: LatLng(35.6654, 139.7707),
+      shortDescription:
+          'A compact morning circuit for seafood and small bites.',
+      longDescription:
+          'The outer market rewards an early visit and a small appetite. Choose a few '
+          'specialists, share portions, and keep the narrow lanes moving.',
+      rating: MultiRating(
+        atmosphere: 4.5,
+        photos: 4.2,
+        crowds: 4.6,
+        access: 4.4,
+      ),
+      tipCount: 11032,
+      bestTimeOfDay: ['breakfast', 'morning'],
+      coverImageRef: 'tsukiji_market',
+    ),
+    Poi(
+      id: 'hallgrimskirkja_walk',
+      cityId: 'reykjavik',
+      name: 'Hallgrimskirkja & Old Town Walk',
+      category: 'walk',
+      location: LatLng(64.1417, -21.9266),
+      shortDescription:
+          'A compact orientation walk from the hill to the harbor.',
+      longDescription:
+          'Start near the church and wander downhill without a rigid route. Small shops, '
+          'corrugated houses, and sea views make the transitions the best part.',
+      rating: MultiRating(
+        atmosphere: 4.6,
+        photos: 4.8,
+        crowds: 2.7,
+        access: 4.5,
+      ),
+      tipCount: 1840,
+      bestTimeOfDay: ['morning', 'blue hour'],
+      coverImageRef: 'reykjavik_walk',
+    ),
   ];
 
   static const shops = <LocalPlace>[

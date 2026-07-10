@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:traveling_app/component/travel/globe/unity_preloader.dart';
+import 'package:traveling_app/component/travel/geo_surface.dart';
 import 'package:traveling_app/route/index.dart';
 import 'package:traveling_app/service/network/dio_quest.dart';
 import 'package:traveling_app/service/socket/mainSocket.dart';
@@ -10,29 +12,34 @@ import 'package:traveling_app/store/user/user_store.dart';
 import 'package:traveling_app/store/app_providers.dart';
 import 'package:traveling_app/store/travel/travel_store.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await Api.main.init(baseUrl: 'http://localhost:3000/api/v1');
 
-  await SocketApi.main.init(url: 'ws://localhost:3000/ws');
-
-  // 预加载字体，避免运行时卡顿
-  // await GoogleFonts.pendingFonts([
-  //   GoogleFonts.fraunces(),
-  //   GoogleFonts.fraunces(fontWeight: FontWeight.w700),
-  // ]);
-
-  // 可选：续期失败时跳登录页
-  Api.main.onUnauthorized = () {
-    SocketApi.main.disconnect();
-    mainRouter.go('/login');
-  };
-
-  if (Api.main.isAuthenticated) {
-    await SocketApi.main.connect();
-  }
-
+  // Render the first frame immediately. Secure storage and local development
+  // services can be slow or unavailable on first launch; waiting for them
+  // before runApp leaves the native window completely blank.
   runApp(const MyApp());
+  unawaited(_initializeServices());
+}
+
+Future<void> _initializeServices() async {
+  try {
+    await Api.main.init(baseUrl: 'http://localhost:3000/api/v1');
+    await SocketApi.main.init(url: 'ws://localhost:3000/ws');
+
+    // 可选：续期失败时跳登录页
+    Api.main.onUnauthorized = () {
+      SocketApi.main.disconnect();
+      mainRouter.go('/login');
+    };
+
+    if (Api.main.isAuthenticated) {
+      await SocketApi.main.connect();
+    }
+  } catch (error, stackTrace) {
+    debugPrint('Service bootstrap failed: $error');
+    debugPrintStack(stackTrace: stackTrace);
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -79,18 +86,8 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp.router(
             onGenerateTitle: (context) => 'GeoTravel',
             routerConfig: mainRouter,
-            builder: (context, child) {
-              final location = mainRouter.routeInformationProvider.value.uri;
-              final shouldPreloadUnity =
-                  location.path != '/explore' && location.path != '/globe-demo';
-
-              return Stack(
-                children: [
-                  if (child != null) child,
-                  if (shouldPreloadUnity) const UnityPreloader(),
-                ],
-              );
-            },
+            builder: (context, child) =>
+                GeoStarfieldBackground(child: child ?? const SizedBox.shrink()),
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
             themeMode: _commonStore.themeMode,

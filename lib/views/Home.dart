@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:traveling_app/component/travel/earth_globe.dart';
+import 'package:traveling_app/component/travel/earthGlobe/travel_earth_globe_view.dart';
+import 'package:traveling_app/component/travel/geo_surface.dart';
 import 'package:traveling_app/component/travel/kit.dart';
 import 'package:traveling_app/service/travel_data.dart';
 import 'package:traveling_app/store/travel/travel_store.dart';
@@ -14,230 +15,291 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  bool _requestedLocation = false;
+  void _openSearch() => context.push('/search');
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).extension<AppCommon>()!;
     final store = TravelStoreScope.of(context);
-    final cities = store.cities;
-
-    if (!_requestedLocation && !store.hasRequestedLocation) {
-      _requestedLocation = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) {
-          return;
-        }
-        store.requestUserLocation();
-      });
-    }
+    final recommendations = store.cities
+        .expand((city) => store.poisForCity(city.id))
+        .take(6)
+        .toList();
 
     return Scaffold(
-      backgroundColor: tokens.background,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/earth_globe/2k_stars.jpg',
-              fit: BoxFit.cover,
-            ),
-          ),
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: Colors.transparent,
+      body: GeoBackground(
+        child: SafeArea(
+          bottom: false,
+          child: GeoContent(
+            child: ListView(
+              padding: const EdgeInsets.only(top: 22, bottom: 112),
               children: [
-                _Header(tokens: tokens, store: store),
-                Expanded(child: _HomeGlobeStage(store: store)),
-                _HomeHotLocation(list: cities),
-                const SizedBox(height: 12),
+                _ExploreHero(store: store, onSearch: _openSearch),
+                const SizedBox(height: 22),
+                GeoSectionHeader(
+                  title: 'Top destinations',
+                  actionLabel: 'See all',
+                  onAction: _openSearch,
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 300,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: store.cities.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 14),
+                    itemBuilder: (context, index) => _DestinationCard(
+                      city: store.cities[index],
+                      rank: index + 1,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const GeoSectionHeader(title: 'Recommended for you'),
+                const SizedBox(height: 10),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: recommendations.length,
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 230,
+                        mainAxisExtent: 252,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
+                      itemBuilder: (context, index) => _PlaceCard(
+                        poi: recommendations[index],
+                        tag: index == 0
+                            ? 'FOR YOU'
+                            : index == 1
+                            ? 'QUIET FIND'
+                            : 'LOCAL PICK',
+                      ),
+                    );
+                  },
+                ),
+                if (recommendations.isEmpty)
+                  const GeoGlassCard(
+                    child: Text(
+                      'Recommendations will appear as local collections are added.',
+                    ),
+                  ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _HomeGlobeStage extends StatelessWidget {
+class _ExploreHero extends StatelessWidget {
   final TravelStore store;
+  final VoidCallback onSearch;
 
-  const _HomeGlobeStage({required this.store});
+  const _ExploreHero({required this.store, required this.onSearch});
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).extension<AppCommon>()!;
     return LayoutBuilder(
       builder: (context, constraints) {
-        return TravelEarthGlobe(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          cities: store.cities,
-          userLocation: store.userLocation,
-          useUnity: false,
-          minLatitude: -75,
-          maxLatitude: 75,
-          autoRotate: true,
-          config: const {
-            'gesturesEnabled': true,
-            'autoRotateEnabled': true,
-            'autoRotateSpeed': 1,
-          },
-          camera: const UnityGlobeCamera(
-            longitude: 0,
-            latitude: 0,
-            height: 18000000,
+        final wide = constraints.maxWidth >= 760;
+        final copy = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              store.isLocating
+                  ? 'Finding your location…'
+                  : '${store.userLocation.city}, ${store.userLocation.country}',
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(color: tokens.brand),
+            ),
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Explore',
+                    style: Theme.of(context).textTheme.displayLarge,
+                  ),
+                ),
+                OutlinedButton.icon(
+                  onPressed: onSearch,
+                  icon: const Icon(Icons.search, size: 17),
+                  label: const Text('Search'),
+                ),
+              ],
+            ),
+          ],
+        );
+
+        final globe = SizedBox(
+          height: wide ? 300 : 245,
+          child: Center(
+            child: TravelEarthGlobeView(
+              width: wide ? 300 : double.infinity,
+              height: wide ? 300 : 245,
+              backgroundSize: Size.infinite,
+              globeAlignment: Alignment.center,
+              showBackground: false,
+              cities: store.cities,
+              userLocation: store.userLocation,
+              onCityTap: (city) => context.push('/explore/city/${city.id}'),
+              autoRotate: true,
+              rotationSpeed: 0.025,
+            ),
           ),
         );
+
+        if (wide) {
+          return Row(
+            children: [
+              Expanded(child: copy),
+              const SizedBox(width: 28),
+              SizedBox(width: 340, child: globe),
+            ],
+          );
+        }
+        return Column(children: [copy, const SizedBox(height: 4), globe]);
       },
     );
   }
 }
 
-class _HomeHotLocation extends StatelessWidget {
-  final List<City> list;
-
-  const _HomeHotLocation({required this.list});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 180,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(color: Colors.transparent),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const TravelLabel('HOT LOCATIONS'),
-              GestureDetector(
-                onTap: () => context.push('/explore'),
-                child: const TravelLabel('SEE ALL →'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: list.length,
-              separatorBuilder: (context, index) => const SizedBox(width: 12),
-              itemBuilder: (context, index) => _CityCard(city: list[index]),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  final AppCommon tokens;
-  final TravelStore store;
-
-  const _Header({required this.tokens, required this.store});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const TravelLabel('YOUR ATLAS · 38 CITIES'),
-              GestureDetector(
-                onTap: () => context.go('/profile'),
-                child: const TravelLabel('PROFILE →'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Where to next?',
-            style: Theme.of(context).textTheme.displayMedium,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _locationStatus(store),
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: tokens.textMuted),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _locationStatus(TravelStore store) {
-    if (store.isLocating) {
-      return 'Finding your location...';
-    }
-    if (store.locationError != null) {
-      return 'Location unavailable · using saved map context';
-    }
-    return 'Current city · ${store.userLocation.city}';
-  }
-}
-
-class _CityCard extends StatelessWidget {
+class _DestinationCard extends StatelessWidget {
   final City city;
+  final int rank;
 
-  const _CityCard({required this.city});
+  const _DestinationCard({required this.city, required this.rank});
 
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).extension<AppCommon>()!;
-    return InkWell(
-      onTap: () => context.push('/explore/city/${city.id}'),
-      borderRadius: BorderRadius.circular(tokens.radiusLg),
-      child: Container(
-        width: 130,
-        height: 140,
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: tokens.surface,
-          borderRadius: BorderRadius.circular(tokens.radiusLg),
-        ),
-        child: Column(
-          children: [
-            TravelPlaceholderImage(
-              seed: city.heroImageRef,
-              width: double.infinity,
-              height: 76,
-              radius: BorderRadius.zero,
+    return SizedBox(
+      width: 292,
+      child: GeoTapSurface(
+        onTap: () => context.push('/explore/city/${city.id}'),
+        semanticLabel: '${city.name}, ${city.country}',
+        borderRadius: BorderRadius.circular(22),
+        child: GeoGradientArt(
+          seed: city.heroImageRef,
+          borderRadius: BorderRadius.circular(22),
+          child: Padding(
+            padding: const EdgeInsets.all(17),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TravelPill(
+                  text: rank == 1 ? 'TRENDING' : '#$rank',
+                  fillColor: Colors.black.withValues(alpha: 0.18),
+                  borderColor: Colors.white.withValues(alpha: 0.14),
+                ),
+                const Spacer(),
+                TravelLabel(city.country, color: tokens.textSecondary),
+                const SizedBox(height: 4),
+                Text(
+                  city.name,
+                  style: Theme.of(context).textTheme.displaySmall,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${city.poiCount} places · ${city.tags.take(2).join(' · ')}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: tokens.textSecondary),
+                ),
+              ],
             ),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                height: double.infinity,
-                decoration: BoxDecoration(color: tokens.surface),
-                padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${city.name}, ${city.country}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 8,
-                        color: tokens.textMuted,
-                      ),
-                    ),
-                    Text(
-                      city.name,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlaceCard extends StatelessWidget {
+  final Poi poi;
+  final String tag;
+
+  const _PlaceCard({required this.poi, required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).extension<AppCommon>()!;
+    final average =
+        (poi.rating.atmosphere + poi.rating.photos + poi.rating.access) / 3;
+    return GeoGlassCard(
+      padding: EdgeInsets.zero,
+      onTap: () => context.push('/explore/city/${poi.cityId}/poi/${poi.id}'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            height: 145,
+            child: GeoGradientArt(
+              seed: poi.coverImageRef,
+              borderRadius: BorderRadius.zero,
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: TravelPill(
+                    text: tag,
+                    fillColor: Colors.black.withValues(alpha: 0.18),
+                    borderColor: Colors.white.withValues(alpha: 0.16),
+                  ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 11),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    poi.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    poi.category,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(color: tokens.textMuted),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      GeoRatingDots(value: average),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Text(
+                          average.toStringAsFixed(1),
+                          maxLines: 1,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

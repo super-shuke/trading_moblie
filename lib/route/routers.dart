@@ -5,6 +5,12 @@ import 'package:traveling_app/views/Home.dart';
 import 'package:traveling_app/views/GlobeDemo.dart';
 import 'package:traveling_app/views/Login/login_screen.dart';
 import 'package:traveling_app/views/Profile.dart';
+import 'package:traveling_app/views/Search.dart';
+import 'package:traveling_app/views/TripMap.dart';
+import 'package:traveling_app/views/profile/EditProfile.dart';
+import 'package:traveling_app/views/profile/AddTravelRecord.dart';
+import 'package:traveling_app/views/profile/TravelHistory.dart';
+import 'package:traveling_app/views/trips/NewTrip.dart';
 import 'package:traveling_app/views/secondDetails/CityDetails.dart';
 import 'package:traveling_app/views/secondDetails/Navigation.dart';
 import 'package:traveling_app/views/secondDetails/PoiDetails.dart';
@@ -24,10 +30,17 @@ final List<Map<String, dynamic>> tabRoutes = [
   },
   {
     'path': '/itinerary',
-    'name': 'Itinerary',
-    'icon': Icons.route_outlined,
+    'name': 'Trips',
+    'icon': Icons.card_travel_outlined,
     'builder': (BuildContext context, GoRouterState state) =>
         const ItineraryView(),
+  },
+  {
+    'path': '/map',
+    'name': 'Map',
+    'icon': Icons.map_outlined,
+    'builder': (BuildContext context, GoRouterState state) =>
+        const TripMapView(),
   },
   {
     'path': '/profile',
@@ -51,6 +64,41 @@ final List<Map<String, dynamic>> secondaryRoutes = [
     'coverBottomBar': true,
     'builder': (BuildContext context, GoRouterState state) =>
         const LoginScreen(),
+  },
+  {
+    'path': '/search',
+    'name': 'search',
+    'coverBottomBar': true,
+    'builder': (BuildContext context, GoRouterState state) =>
+        const TravelSearchView(),
+  },
+  {
+    'path': '/profile/edit',
+    'name': 'editProfile',
+    'coverBottomBar': true,
+    'builder': (BuildContext context, GoRouterState state) =>
+        const EditProfileView(),
+  },
+  {
+    'path': '/profile/history',
+    'name': 'travelHistory',
+    'coverBottomBar': true,
+    'builder': (BuildContext context, GoRouterState state) =>
+        const TravelHistoryView(),
+  },
+  {
+    'path': '/profile/history/add',
+    'name': 'addTravelRecord',
+    'coverBottomBar': true,
+    'builder': (BuildContext context, GoRouterState state) =>
+        const AddTravelRecordView(),
+  },
+  {
+    'path': '/itinerary/new',
+    'name': 'newTrip',
+    'coverBottomBar': true,
+    'builder': (BuildContext context, GoRouterState state) =>
+        const NewTripView(),
   },
   {
     'path': '/explore/city/:cityId',

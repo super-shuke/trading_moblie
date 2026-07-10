@@ -10,8 +10,6 @@ PODS:
     - GoogleUtilities/UserDefaults (~> 8.0)
     - PromisesObjC (~> 2.4)
   - Flutter (1.0.0)
-  - flutter_embed_unity_2022_3_ios (0.0.1):
-    - Flutter
   - flutter_secure_storage (6.0.0):
     - Flutter
   - geocoding_ios (1.0.5):
@@ -55,7 +53,6 @@ PODS:
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - flutter_embed_unity_2022_3_ios (from `.symlinks/plugins/flutter_embed_unity_2022_3_ios/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
@@ -76,8 +73,6 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
-  flutter_embed_unity_2022_3_ios:
-    :path: ".symlinks/plugins/flutter_embed_unity_2022_3_ios/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   geocoding_ios:
@@ -95,7 +90,6 @@ SPEC CHECKSUMS:
   AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
   AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_embed_unity_2022_3_ios: 80af09418e6313fee883c13721ad0451733c3aaa
   flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
   geocoding_ios: 33776c9ebb98d037b5e025bb0e7537f6dd19646e
   geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
@@ -108,6 +102,6 @@ SPEC CHECKSUMS:
   path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
 
-PODFILE CHECKSUM: feee8f24274fbdfc3d3d8541b99e32e0632d19e9
+PODFILE CHECKSUM: ff521e11cbe6f8b5da6af5a80160d65b614f3bc3
 
 COCOAPODS: 1.16.2

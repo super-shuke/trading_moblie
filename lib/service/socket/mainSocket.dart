@@ -37,7 +37,6 @@
 // ⑤ 主动发命令
 //      Realtime.I.startNavigation(poiId: 'xxx');
 //      Realtime.I.updateNavigation(sessionId: 's1', lat: ..., lng: ...);
-//      Realtime.I.unityFocusCity(sessionId: 's1', cityId: 'xxx');
 //
 // ⑥ 连接状态（用于在 UI 显示"实时已连"角标）
 //      Realtime.I.onConnectionStateChanged = (state) { ... };
@@ -54,9 +53,8 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:traveling_app/service/network/dio_quest.dart';
-
 
 // ─── 公开类型 ───────────────────────────────────────────────────────────────
 
@@ -77,8 +75,7 @@ class RealtimeEvent {
 }
 
 typedef RealtimeListener<T> = void Function(T data);
-typedef ConnectionStateListener =
-    void Function(RealtimeConnectionState state);
+typedef ConnectionStateListener = void Function(RealtimeConnectionState state);
 
 // ─── 事件名常量（与后端 src/realtime/events.ts 对齐） ───────────────────────
 
@@ -95,10 +92,6 @@ abstract class _Ev {
   static const itineraryUpdated = 'itinerary.updated';
   static const itineraryReordered = 'itinerary.reordered';
   static const navigationUpdated = 'navigation.updated';
-  static const unitySceneReady = 'unity.scene.ready';
-  static const unityCitySelected = 'unity.city.selected';
-  static const unityPoiSelected = 'unity.poi.selected';
-  static const unityCameraChanged = 'unity.camera.changed';
 
   // client → server
   static const cmdSubscribe = 'subscribe';
@@ -106,10 +99,6 @@ abstract class _Ev {
   static const cmdNavigationStart = 'navigation.start';
   static const cmdNavigationUpdate = 'navigation.update';
   static const cmdNavigationStop = 'navigation.stop';
-  static const cmdUnityFocusCity = 'unity.focus_city';
-  static const cmdUnityFocusPoi = 'unity.focus_poi';
-  static const cmdUnitySetMode = 'unity.set_mode';
-  static const cmdUnityCamera = 'unity.camera.changed';
   static const cmdItineraryReorder = 'itinerary.reorder';
 }
 
@@ -131,7 +120,7 @@ class SocketApi {
   bool _initialized = false;
 
   // ─── 状态 ──────────────────────────────────────────────────────────────
-  IO.Socket? _socket;
+  io.Socket? _socket;
   RealtimeConnectionState _state = RealtimeConnectionState.idle;
 
   /// 当前订阅的频道（重连时恢复）
@@ -158,10 +147,6 @@ class SocketApi {
   final _itineraryUpdatedCtl = StreamController<dynamic>.broadcast();
   final _itineraryReorderedCtl = StreamController<dynamic>.broadcast();
   final _navigationUpdatedCtl = StreamController<dynamic>.broadcast();
-  final _unitySceneReadyCtl = StreamController<dynamic>.broadcast();
-  final _unityCitySelectedCtl = StreamController<dynamic>.broadcast();
-  final _unityPoiSelectedCtl = StreamController<dynamic>.broadcast();
-  final _unityCameraChangedCtl = StreamController<dynamic>.broadcast();
 
   /// 所有服务端事件的统一流（Redux/Bloc 用这个最方便）
   Stream<RealtimeEvent> get events => _eventsCtl.stream;
@@ -177,10 +162,6 @@ class SocketApi {
   Stream<dynamic> get itineraryUpdated => _itineraryUpdatedCtl.stream;
   Stream<dynamic> get itineraryReordered => _itineraryReorderedCtl.stream;
   Stream<dynamic> get navigationUpdated => _navigationUpdatedCtl.stream;
-  Stream<dynamic> get unitySceneReady => _unitySceneReadyCtl.stream;
-  Stream<dynamic> get unityCitySelected => _unityCitySelectedCtl.stream;
-  Stream<dynamic> get unityPoiSelected => _unityPoiSelectedCtl.stream;
-  Stream<dynamic> get unityCameraChanged => _unityCameraChangedCtl.stream;
 
   // ─── Callback 风格 API（单监听者） ───────────────────────────────────
   ConnectionStateListener? onConnectionStateChanged;
@@ -193,10 +174,6 @@ class SocketApi {
   RealtimeListener<dynamic>? onItineraryUpdated;
   RealtimeListener<dynamic>? onItineraryReordered;
   RealtimeListener<dynamic>? onNavigationUpdated;
-  RealtimeListener<dynamic>? onUnitySceneReady;
-  RealtimeListener<dynamic>? onUnityCitySelected;
-  RealtimeListener<dynamic>? onUnityPoiSelected;
-  RealtimeListener<dynamic>? onUnityCameraChanged;
   RealtimeListener<dynamic>? onError;
 
   // ─── 公开只读 ──────────────────────────────────────────────────────────
@@ -262,7 +239,7 @@ class SocketApi {
 
   /// 订阅频道。
   /// 格式：`user:<id>` / `city:<id>` / `poi:<id>` / `itinerary:<id>` /
-  ///       `navigation:<sessionId>` / `unity:<sessionId>`
+  ///       `navigation:<sessionId>`
   ///
   /// 连接断开后会被记住，重连后自动恢复订阅。
   void subscribe(String channel) {
@@ -311,42 +288,6 @@ class SocketApi {
     _socket?.emit(_Ev.cmdNavigationStop, {'sessionId': sessionId});
   }
 
-  void unityFocusCity({required String sessionId, required String cityId}) {
-    _socket?.emit(_Ev.cmdUnityFocusCity, {
-      'sessionId': sessionId,
-      'entityId': cityId,
-    });
-  }
-
-  void unityFocusPoi({required String sessionId, required String poiId}) {
-    _socket?.emit(_Ev.cmdUnityFocusPoi, {
-      'sessionId': sessionId,
-      'entityId': poiId,
-    });
-  }
-
-  void unitySetMode({required String sessionId, required String mode}) {
-    _socket?.emit(_Ev.cmdUnitySetMode, {'sessionId': sessionId, 'mode': mode});
-  }
-
-  void sendUnityCamera({
-    required String sessionId,
-    required double lat,
-    required double lng,
-    double? alt,
-    double? pitch,
-    double? yaw,
-  }) {
-    _socket?.emit(_Ev.cmdUnityCamera, {
-      'sessionId': sessionId,
-      'lat': lat,
-      'lng': lng,
-      if (alt != null) 'alt': alt,
-      if (pitch != null) 'pitch': pitch,
-      if (yaw != null) 'yaw': yaw,
-    });
-  }
-
   /// 行程站点重排"预览"（多端实时同步，不落库；持久化走 REST）
   void itineraryReorderPreview({
     required String itineraryId,
@@ -377,21 +318,17 @@ class SocketApi {
     await _itineraryUpdatedCtl.close();
     await _itineraryReorderedCtl.close();
     await _navigationUpdatedCtl.close();
-    await _unitySceneReadyCtl.close();
-    await _unityCitySelectedCtl.close();
-    await _unityPoiSelectedCtl.close();
-    await _unityCameraChangedCtl.close();
   }
 
   // ════════════════════════════════════════════════════════════════════════
   //                              内部实现
   // ════════════════════════════════════════════════════════════════════════
 
-  IO.Socket _buildSocket() {
+  io.Socket _buildSocket() {
     final token = Api.main.accessToken;
-    return IO.io(
+    return io.io(
       _url,
-      IO.OptionBuilder()
+      io.OptionBuilder()
           .setPath(_path)
           .setTransports(['websocket']) // 必须仅 websocket，与后端一致
           .disableAutoConnect() // 我们手动控制
@@ -401,7 +338,7 @@ class SocketApi {
     );
   }
 
-  void _bindHandlers(IO.Socket socket) {
+  void _bindHandlers(io.Socket socket) {
     // ── 连接生命周期 ────────────────────────────────────────────────
     socket.onConnect((_) {
       debugPrint('[Realtime] 已连接 socket=${socket.id}');
@@ -448,31 +385,62 @@ class SocketApi {
     });
 
     // ── 业务事件 → 同时分发到 Stream + Callback + 通用流 ─────────────
-    socket.on(_Ev.userProfileUpdated, (d) => _emit(_Ev.userProfileUpdated,
-        d, _userProfileUpdatedCtl, onUserProfileUpdated));
-    socket.on(_Ev.poiSaved, (d) => _emit(_Ev.poiSaved, d, _poiSavedCtl, onPoiSaved));
-    socket.on(_Ev.poiUnsaved,
-        (d) => _emit(_Ev.poiUnsaved, d, _poiUnsavedCtl, onPoiUnsaved));
-    socket.on(_Ev.tipCreated,
-        (d) => _emit(_Ev.tipCreated, d, _tipCreatedCtl, onTipCreated));
-    socket.on(_Ev.tipUpdated,
-        (d) => _emit(_Ev.tipUpdated, d, _tipUpdatedCtl, onTipUpdated));
-    socket.on(_Ev.tipDeleted,
-        (d) => _emit(_Ev.tipDeleted, d, _tipDeletedCtl, onTipDeleted));
-    socket.on(_Ev.itineraryUpdated, (d) => _emit(_Ev.itineraryUpdated, d,
-        _itineraryUpdatedCtl, onItineraryUpdated));
-    socket.on(_Ev.itineraryReordered, (d) => _emit(_Ev.itineraryReordered, d,
-        _itineraryReorderedCtl, onItineraryReordered));
-    socket.on(_Ev.navigationUpdated, (d) => _emit(_Ev.navigationUpdated, d,
-        _navigationUpdatedCtl, onNavigationUpdated));
-    socket.on(_Ev.unitySceneReady, (d) => _emit(_Ev.unitySceneReady, d,
-        _unitySceneReadyCtl, onUnitySceneReady));
-    socket.on(_Ev.unityCitySelected, (d) => _emit(_Ev.unityCitySelected, d,
-        _unityCitySelectedCtl, onUnityCitySelected));
-    socket.on(_Ev.unityPoiSelected, (d) => _emit(_Ev.unityPoiSelected, d,
-        _unityPoiSelectedCtl, onUnityPoiSelected));
-    socket.on(_Ev.unityCameraChanged, (d) => _emit(_Ev.unityCameraChanged, d,
-        _unityCameraChangedCtl, onUnityCameraChanged));
+    socket.on(
+      _Ev.userProfileUpdated,
+      (d) => _emit(
+        _Ev.userProfileUpdated,
+        d,
+        _userProfileUpdatedCtl,
+        onUserProfileUpdated,
+      ),
+    );
+    socket.on(
+      _Ev.poiSaved,
+      (d) => _emit(_Ev.poiSaved, d, _poiSavedCtl, onPoiSaved),
+    );
+    socket.on(
+      _Ev.poiUnsaved,
+      (d) => _emit(_Ev.poiUnsaved, d, _poiUnsavedCtl, onPoiUnsaved),
+    );
+    socket.on(
+      _Ev.tipCreated,
+      (d) => _emit(_Ev.tipCreated, d, _tipCreatedCtl, onTipCreated),
+    );
+    socket.on(
+      _Ev.tipUpdated,
+      (d) => _emit(_Ev.tipUpdated, d, _tipUpdatedCtl, onTipUpdated),
+    );
+    socket.on(
+      _Ev.tipDeleted,
+      (d) => _emit(_Ev.tipDeleted, d, _tipDeletedCtl, onTipDeleted),
+    );
+    socket.on(
+      _Ev.itineraryUpdated,
+      (d) => _emit(
+        _Ev.itineraryUpdated,
+        d,
+        _itineraryUpdatedCtl,
+        onItineraryUpdated,
+      ),
+    );
+    socket.on(
+      _Ev.itineraryReordered,
+      (d) => _emit(
+        _Ev.itineraryReordered,
+        d,
+        _itineraryReorderedCtl,
+        onItineraryReordered,
+      ),
+    );
+    socket.on(
+      _Ev.navigationUpdated,
+      (d) => _emit(
+        _Ev.navigationUpdated,
+        d,
+        _navigationUpdatedCtl,
+        onNavigationUpdated,
+      ),
+    );
   }
 
   /// 统一分发：通用流 + 专用流 + 回调，三处都发
@@ -498,12 +466,15 @@ class SocketApi {
     if (_reconnectTimer?.isActive ?? false) return;
 
     final base = _reconnectInitial.inMilliseconds;
-    final delayMs = (base * (1 << _reconnectAttempts.clamp(0, 5)))
-        .clamp(base, _reconnectMax.inMilliseconds);
+    final delayMs = (base * (1 << _reconnectAttempts.clamp(0, 5))).clamp(
+      base,
+      _reconnectMax.inMilliseconds,
+    );
     _reconnectAttempts++;
 
     debugPrint(
-        '[Realtime] reconnect in ${delayMs}ms (attempt $_reconnectAttempts)');
+      '[Realtime] reconnect in ${delayMs}ms (attempt $_reconnectAttempts)',
+    );
     _setState(RealtimeConnectionState.reconnecting);
 
     _reconnectTimer = Timer(Duration(milliseconds: delayMs), () {
@@ -552,7 +523,9 @@ class SocketApi {
   }
 
   void _assertInit() {
-    assert(_initialized,
-        'Realtime 未初始化。请在 main() 中调用 Realtime.I.init(url: ...)');
+    assert(
+      _initialized,
+      'Realtime 未初始化。请在 main() 中调用 Realtime.I.init(url: ...)',
+    );
   }
 }

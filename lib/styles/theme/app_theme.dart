@@ -36,7 +36,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: themes.background,
+      scaffoldBackgroundColor: Colors.transparent,
       textTheme: buildAppTextTheme(themes),
       extensions: <ThemeExtension<dynamic>>[
         themes,
@@ -46,7 +46,7 @@ class AppTheme {
       textButtonTheme: buttons.text,
       outlinedButtonTheme: buttons.outlined,
       appBarTheme: AppBarTheme(
-        backgroundColor: themes.background,
+        backgroundColor: Colors.transparent,
         foregroundColor: themes.textPrimary,
         elevation: 0,
         surfaceTintColor: Colors.transparent,

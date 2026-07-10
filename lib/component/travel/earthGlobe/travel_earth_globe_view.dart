@@ -213,14 +213,14 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
 
       // ─── 缩放（相机距离，不是球大小）────────────────────
       zoom: widget.zoom,
-      minZoom: -0.6, // 最小缩放（最远）
-      maxZoom: 1.4, // 最大缩放（最近）
-      isZoomEnabled:
-          widget.gesturesEnabled && widget.onCityTap != null, // 只有可交互时才允许缩放
-      panSensitivity: 0.75, // 拖拽灵敏度
+      minZoom: -0.45,
+      maxZoom: 0.9,
+      isZoomEnabled: widget.gesturesEnabled,
+      panSensitivity: 0.62,
       minLatitude: widget.minLatitude,
       maxLatitude: widget.maxLatitude,
-      zoomSensitivity: 0.55, // 缩放灵敏度
+      zoomSensitivity: 0.42,
+      zoomToMousePosition: false,
       // ─── 大气层 ───────────────────────────────────────
       showAtmosphere: true,
       atmosphereOpacity: widget.atmosphereOpacity, // 透明度（0 全透 ~ 1 不透）
@@ -272,10 +272,8 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
       _syncPoints();
     }
 
-    if (oldWidget.gesturesEnabled != widget.gesturesEnabled ||
-        oldWidget.onCityTap != widget.onCityTap) {
-      _controller.isZoomEnabled =
-          widget.gesturesEnabled && widget.onCityTap != null;
+    if (oldWidget.gesturesEnabled != widget.gesturesEnabled) {
+      _controller.isZoomEnabled = widget.gesturesEnabled;
     }
 
     // 旋转相关属性变化时，重新启动/停止旋转。

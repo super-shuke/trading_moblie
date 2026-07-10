@@ -3,6 +3,48 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:traveling_app/service/travel_data.dart';
 
+enum TravelRecordType { country, place }
+
+class TravelRecord {
+  final String id;
+  final TravelRecordType type;
+  final String title;
+  final String city;
+  final String category;
+  final DateTime date;
+  final String comment;
+
+  const TravelRecord({
+    required this.id,
+    required this.type,
+    required this.title,
+    this.city = '',
+    this.category = '',
+    required this.date,
+    this.comment = '',
+  });
+}
+
+class PlannedTrip {
+  final String id;
+  final String name;
+  final String country;
+  final String city;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final int travelers;
+
+  const PlannedTrip({
+    required this.id,
+    required this.name,
+    required this.country,
+    required this.city,
+    this.startDate,
+    this.endDate,
+    required this.travelers,
+  });
+}
+
 /// 旅行域状态容器。
 ///
 /// 保持当前项目原有的 `ChangeNotifier + Scope` 架构，
@@ -17,6 +59,9 @@ class TravelStore extends ChangeNotifier {
   );
   UserProfile _profile = TravelMockData.profile;
   Itinerary _itinerary = TravelMockData.defaultItinerary();
+  final Set<String> _completedStopIds = <String>{};
+  final List<TravelRecord> _travelRecords = <TravelRecord>[];
+  final List<PlannedTrip> _plannedTrips = <PlannedTrip>[];
   bool _isLocating = false;
   bool _hasRequestedLocation = false;
   String? _locationError;
@@ -25,6 +70,9 @@ class TravelStore extends ChangeNotifier {
   UserLocation get userLocation => _userLocation;
   UserProfile get profile => _profile;
   Itinerary get itinerary => _itinerary;
+  Set<String> get completedStopIds => Set.unmodifiable(_completedStopIds);
+  List<TravelRecord> get travelRecords => List.unmodifiable(_travelRecords);
+  List<PlannedTrip> get plannedTrips => List.unmodifiable(_plannedTrips);
   bool get isLocating => _isLocating;
   bool get hasRequestedLocation => _hasRequestedLocation;
   String? get locationError => _locationError;
@@ -167,6 +215,41 @@ class TravelStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool isStopCompleted(String stopId) => _completedStopIds.contains(stopId);
+
+  void toggleStopCompleted(String stopId) {
+    if (!_completedStopIds.add(stopId)) {
+      _completedStopIds.remove(stopId);
+    }
+    notifyListeners();
+  }
+
+  bool isPoiInItinerary(String poiId) =>
+      _itinerary.stops.any((stop) => stop.poiId == poiId);
+
+  /// Adds a discovery to the current journey at the next sensible time.
+  void addPoiToItinerary(String poiId) {
+    if (isPoiInItinerary(poiId)) return;
+    final previous = _itinerary.stops.isEmpty ? null : _itinerary.stops.last;
+    final arriveAt = previous == null
+        ? DateTime(
+            _itinerary.date.year,
+            _itinerary.date.month,
+            _itinerary.date.day,
+            9,
+          )
+        : previous.arriveAt.add(previous.dwell + const Duration(minutes: 45));
+    final stop = ItineraryStop(
+      id: 's_${DateTime.now().microsecondsSinceEpoch}',
+      poiId: poiId,
+      arriveAt: arriveAt,
+      dwell: const Duration(minutes: 75),
+      note: 'Added from Explore.',
+    );
+    _itinerary = _itinerary.copyWith(stops: [..._itinerary.stops, stop]);
+    notifyListeners();
+  }
+
   /// 收藏一个 POI，并同步更新个人页 saved 列表。
   void savePoi(String poiId) {
     if (_profile.savedPoiIds.contains(poiId)) {
@@ -184,6 +267,16 @@ class TravelStore extends ChangeNotifier {
     _profile = _profile.copyWith(
       savedPoiIds: _profile.savedPoiIds.where((id) => id != poiId).toList(),
     );
+    notifyListeners();
+  }
+
+  void addTravelRecord(TravelRecord record) {
+    _travelRecords.insert(0, record);
+    notifyListeners();
+  }
+
+  void addPlannedTrip(PlannedTrip trip) {
+    _plannedTrips.insert(0, trip);
     notifyListeners();
   }
 }

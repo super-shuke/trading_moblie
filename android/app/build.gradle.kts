@@ -30,25 +30,6 @@ android {
         versionName = flutter.versionName
     }
 
-    androidResources {
-        val unityStreamingAssetsList =
-            (project.findProperty("unityStreamingAssets") as? String)
-                ?.split(",")
-                ?.map { it.trim() }
-                ?.filter { it.isNotEmpty() }
-                ?: emptyList()
-
-        noCompress += listOf(
-            ".unity3d",
-            ".ress",
-            ".resource",
-            ".obb",
-            ".bundle",
-            ".unityexp",
-        ) + unityStreamingAssetsList
-        ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~"
-    }
-
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
@@ -60,10 +41,4 @@ android {
 
 flutter {
     source = "../.."
-}
-
-dependencies {
-    if (project.findProject(":unityLibrary") != null) {
-        implementation(project(":unityLibrary"))
-    }
 }
