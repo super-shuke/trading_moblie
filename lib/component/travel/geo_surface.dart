@@ -5,8 +5,8 @@ import 'package:traveling_app/styles/theme/app_common.dart';
 
 const geoStarfieldAsset = 'assets/earth_globe/2k_stars.jpg';
 
-/// The single app-wide background. Route pages stay transparent above it so
-/// transitions never flash a different color or generate a second starfield.
+/// Route-level background that stays attached to its page for the full
+/// push/pop transition.
 class GeoStarfieldBackground extends StatelessWidget {
   final Widget child;
 

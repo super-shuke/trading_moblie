@@ -71,9 +71,9 @@ class RotatingGlobeState extends State<RotatingGlobe>
   late double rotationZ =
       0; // The rotation angle around the Z-axis of the sphere.
   late double
-      _lastRotationX; // The previous rotation angle around the X-axis of the sphere.
+  _lastRotationX; // The previous rotation angle around the X-axis of the sphere.
   late double
-      _lastRotationZ; // The previous rotation angle around the Z-axis of the sphere.
+  _lastRotationZ; // The previous rotation angle around the Z-axis of the sphere.
   late double rotationY =
       0; // The rotation angle around the Y-axis of the sphere.
   final GlobalKey _futureBuilderKey =
@@ -81,12 +81,12 @@ class RotatingGlobeState extends State<RotatingGlobe>
 
   late Offset _lastFocalPoint; // The previous focal point of the interaction.
   late AnimationController
-      _lineMovingController; // The animation controller for line movement.
+  _lineMovingController; // The animation controller for line movement.
 
   double _angularVelocityX = 0.0; // The angular velocity around the X-axis.
   double _angularVelocityZ = 0.0; // The angular velocity around the Z-axis.
   late AnimationController
-      _decelerationController; // The animation controller for deceleration.
+  _decelerationController; // The animation controller for deceleration.
 
   // Globe.GL-style smooth zoom
   AnimationController? _zoomAnimationController;
@@ -95,7 +95,7 @@ class RotatingGlobeState extends State<RotatingGlobe>
   double _lastScale = 1.0; // Track the last scale for incremental zoom
 
   AnimationController?
-      _dayNightCycleController; // The animation controller for day/night cycle.
+  _dayNightCycleController; // The animation controller for day/night cycle.
 
   double _targetRotationX = 0.0;
   double _targetRotationZ = 0.0;
@@ -193,28 +193,30 @@ class RotatingGlobeState extends State<RotatingGlobe>
   @override
   void initState() {
     widget.controller.addListener(_update);
-    widget.controller.rotationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    )..addListener(() {
-        if (mounted) {
-          setState(() {
-            rotationZ = (rotationZ -
-                    (widget.controller.rotationSpeed *
-                        ((math.pow((2 * math.pi), 2) / 360)))) %
-                (2 * math.pi);
-          });
+    widget.controller.rotationController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(seconds: 1),
+        )..addListener(() {
+          if (mounted) {
+            setState(() {
+              rotationZ =
+                  (rotationZ -
+                      (widget.controller.rotationSpeed *
+                          ((math.pow((2 * math.pi), 2) / 360)))) %
+                  (2 * math.pi);
+            });
 
-          // Update hover coordinates during rotation if mouse is over the globe
-          _updateHoverCoordinatesDuringRotation();
+            // Update hover coordinates during rotation if mouse is over the globe
+            _updateHoverCoordinatesDuringRotation();
 
-          if (widget.controller.rotationController.isCompleted) {
-            if (widget.controller.isRotating) {
-              widget.controller.rotationController.repeat();
+            if (widget.controller.rotationController.isCompleted) {
+              if (widget.controller.isRotating) {
+                widget.controller.rotationController.repeat();
+              }
             }
           }
-        }
-      });
+        });
 
     widget.controller.onPointConnectionAdded = _addConnection;
 
@@ -226,78 +228,86 @@ class RotatingGlobeState extends State<RotatingGlobe>
 
     // Globe.GL-style continuous animation controller
     // Uses a simple repeating animation to drive frame updates
-    _lineMovingController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 16), // ~60fps
-    )
-      ..addListener(() {
-        if (mounted) {
-          // Check if there are any moving connections or connections with dashAnimateTime
-          bool hasAnimatingConnections = false;
-          for (var connection in widget.controller.connections) {
-            if (connection.isMoving || connection.style.dashAnimateTime > 0) {
-              hasAnimatingConnections = true;
-              break;
-            }
-          }
+    _lineMovingController =
+        AnimationController(
+            vsync: this,
+            duration: const Duration(milliseconds: 16), // ~60fps
+          )
+          ..addListener(() {
+            if (mounted) {
+              // Check if there are any moving connections or connections with dashAnimateTime
+              bool hasAnimatingConnections = false;
+              for (var connection in widget.controller.connections) {
+                if (connection.isMoving ||
+                    connection.style.dashAnimateTime > 0) {
+                  hasAnimatingConnections = true;
+                  break;
+                }
+              }
 
-          // Check if there are any orbiting satellites
-          bool hasOrbitingSatellites = false;
-          for (var satellite in widget.controller.satellites) {
-            if (satellite.orbit != null) {
-              hasOrbitingSatellites = true;
-              break;
-            }
-          }
+              // Check if there are any orbiting satellites
+              bool hasOrbitingSatellites = false;
+              for (var satellite in widget.controller.satellites) {
+                if (satellite.orbit != null) {
+                  hasOrbitingSatellites = true;
+                  break;
+                }
+              }
 
-          // Trigger foreground repaint for animations
-          // Use modulo to prevent integer overflow after long runtime
-          if (hasAnimatingConnections || hasOrbitingSatellites) {
-            _animationNotifier.value = (_animationNotifier.value + 1) % 1000000;
-          }
-        }
-      })
-      ..repeat();
+              // Trigger foreground repaint for animations
+              // Use modulo to prevent integer overflow after long runtime
+              if (hasAnimatingConnections || hasOrbitingSatellites) {
+                _animationNotifier.value =
+                    (_animationNotifier.value + 1) % 1000000;
+              }
+            }
+          })
+          ..repeat();
 
     rotationX = 0;
     rotationY = 0; // Initialize rotationY
     rotationZ = 0;
 
-    _decelerationController = AnimationController(
-      vsync: this,
-      duration: const Duration(
-          milliseconds: 1200), // Longer for smoother deceleration
-    )..addListener(() {
-        if (mounted) {
-          // Use easeOutQuint for smoother, more natural deceleration like globe.gl
-          final t =
-              Curves.easeOutQuint.transform(_decelerationController.value);
+    _decelerationController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(
+            milliseconds: 1200,
+          ), // Longer for smoother deceleration
+        )..addListener(() {
+          if (mounted) {
+            // Use easeOutQuint for smoother, more natural deceleration like globe.gl
+            final t = Curves.easeOutQuint.transform(
+              _decelerationController.value,
+            );
 
-          rotationX = _clampVerticalRotation(
-            _initialRotationX + (_targetRotationX - _initialRotationX) * t,
-          );
-          rotationY = -rotationX;
-          rotationZ =
-              _initialRotationZ + (_targetRotationZ - _initialRotationZ) * t;
+            rotationX = _clampVerticalRotation(
+              _initialRotationX + (_targetRotationX - _initialRotationX) * t,
+            );
+            rotationY = -rotationX;
+            rotationZ =
+                _initialRotationZ + (_targetRotationZ - _initialRotationZ) * t;
 
-          setState(() {});
-        }
-      });
+            setState(() {});
+          }
+        });
 
     // Initialize zoom animation controller for smooth zoom transitions
-    _zoomAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    )..addListener(() {
-        if (mounted) {
-          final t =
-              Curves.easeOutCubic.transform(_zoomAnimationController!.value);
-          widget.controller.zoom =
-              _initialZoom + (_targetZoom - _initialZoom) * t;
-          widget.onZoomChanged?.call(widget.controller.zoom);
-          setState(() {});
-        }
-      });
+    _zoomAnimationController =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 300),
+        )..addListener(() {
+          if (mounted) {
+            final t = Curves.easeOutCubic.transform(
+              _zoomAnimationController!.value,
+            );
+            widget.controller.zoom =
+                _initialZoom + (_targetZoom - _initialZoom) * t;
+            widget.onZoomChanged?.call(widget.controller.zoom);
+            setState(() {});
+          }
+        });
 
     // Initialize day/night cycle animation controller
     _initDayNightCycleController();
@@ -327,7 +337,8 @@ class RotatingGlobeState extends State<RotatingGlobe>
       });
       if (!sphereSuccess) {
         debugPrint(
-            'GPU shader rendering not available, falling back to CPU rendering');
+          'GPU shader rendering not available, falling back to CPU rendering',
+        );
         if (_shaderManager.loadError != null) {
           debugPrint('Shader load error: ${_shaderManager.loadError}');
         }
@@ -344,10 +355,12 @@ class RotatingGlobeState extends State<RotatingGlobe>
       });
       if (!backgroundSuccess) {
         debugPrint(
-            'GPU background shader not available, falling back to CPU rendering');
+          'GPU background shader not available, falling back to CPU rendering',
+        );
         if (_backgroundShaderManager.loadError != null) {
           debugPrint(
-              'Background shader load error: ${_backgroundShaderManager.loadError}');
+            'Background shader load error: ${_backgroundShaderManager.loadError}',
+          );
         }
       }
     } catch (e) {
@@ -365,14 +378,15 @@ class RotatingGlobeState extends State<RotatingGlobe>
   /// Initialize the day/night cycle animation controller
   void _initDayNightCycleController() {
     if (widget.controller.useRealTimeSunPosition) {
-      _dayNightCycleController = AnimationController(
-        vsync: this,
-        duration: const Duration(seconds: 60), // Update every minute
-      )..addListener(() {
-          if (mounted && widget.controller.useRealTimeSunPosition) {
-            widget.controller.updateSunPositionFromRealTime();
-          }
-        });
+      _dayNightCycleController =
+          AnimationController(
+            vsync: this,
+            duration: const Duration(seconds: 60), // Update every minute
+          )..addListener(() {
+            if (mounted && widget.controller.useRealTimeSunPosition) {
+              widget.controller.updateSunPositionFromRealTime();
+            }
+          });
       _dayNightCycleController!.repeat();
     }
   }
@@ -406,20 +420,21 @@ class RotatingGlobeState extends State<RotatingGlobe>
     // Calculate starting value based on current sun position
     final startValue = _calculateAnimationValueFromSunLongitude();
 
-    _dayNightCycleController = AnimationController(
-      vsync: this,
-      duration: cycleDuration,
-      value: startValue.clamp(0.0, 1.0),
-    )..addListener(() {
-        if (mounted) {
-          // Animate sun longitude based on direction
-          widget.controller.sunLongitude =
-              _calculateSunLongitudeFromAnimationValue(
-            _dayNightCycleController!.value,
-          );
-          setState(() {});
-        }
-      });
+    _dayNightCycleController =
+        AnimationController(
+          vsync: this,
+          duration: cycleDuration,
+          value: startValue.clamp(0.0, 1.0),
+        )..addListener(() {
+          if (mounted) {
+            // Animate sun longitude based on direction
+            widget.controller.sunLongitude =
+                _calculateSunLongitudeFromAnimationValue(
+                  _dayNightCycleController!.value,
+                );
+            setState(() {});
+          }
+        });
     _dayNightCycleController!.repeat();
   }
 
@@ -451,10 +466,12 @@ class RotatingGlobeState extends State<RotatingGlobe>
   }
 
   /// Focus on the specified coordinates on the sphere.
-  void focusOnCoordinates(GlobeCoordinates coordinates,
-      {required bool animate,
-      required Duration? duration,
-      Curve curve = Curves.linear}) {
+  void focusOnCoordinates(
+    GlobeCoordinates coordinates, {
+    required bool animate,
+    required Duration? duration,
+    Curve curve = Curves.linear,
+  }) {
     double latRad = _clampVerticalRotation(radians(coordinates.latitude));
     double lonRad = radians(-coordinates.longitude);
     final targetRotationZ = -lonRad;
@@ -505,8 +522,11 @@ class RotatingGlobeState extends State<RotatingGlobe>
   }
 
   /// Add a connection to the sphere
-  void _addConnection(AnimatedPointConnection connection,
-      {required bool animateDraw, required Duration animateDrawDuration}) {
+  void _addConnection(
+    AnimatedPointConnection connection, {
+    required bool animateDraw,
+    required Duration animateDrawDuration,
+  }) {
     if (animateDraw) {
       final animation = AnimationController(
         vsync: this,
@@ -553,7 +573,8 @@ class RotatingGlobeState extends State<RotatingGlobe>
 
     // Calculate the angle between the point and the sun
     // Using spherical law of cosines
-    final cosAngle = math.sin(lat) * math.sin(sunLatRad) +
+    final cosAngle =
+        math.sin(lat) * math.sin(sunLatRad) +
         math.cos(lat) * math.cos(sunLatRad) * math.cos(lon - sunLonRad);
 
     // Convert to a 0-1 factor with smooth transition
@@ -576,7 +597,8 @@ class RotatingGlobeState extends State<RotatingGlobe>
     if (_cachedCpuSurface != widget.controller.surface) return false;
     if (_cachedCpuNightSurface != widget.controller.nightSurface) return false;
 
-    final hasDayNightCycle = widget.controller.isDayNightCycleEnabled &&
+    final hasDayNightCycle =
+        widget.controller.isDayNightCycleEnabled &&
         widget.controller.nightSurface != null;
 
     // If day/night cycle is enabled, check sun position
@@ -624,7 +646,8 @@ class RotatingGlobeState extends State<RotatingGlobe>
     }
 
     // Check if day/night cycle is enabled and we have night surface
-    final hasDayNightCycle = widget.controller.isDayNightCycleEnabled &&
+    final hasDayNightCycle =
+        widget.controller.isDayNightCycleEnabled &&
         widget.controller.nightSurface != null &&
         widget.controller.nightSurfaceProcessed != null;
 
@@ -685,9 +708,10 @@ class RotatingGlobeState extends State<RotatingGlobe>
         if (zSquared > 0 || edgeAlpha > 0) {
           // For edge pixels, use a safe z calculation
           final safeZSquared = math.max(
-              0.0,
-              sphereRadiusSquared -
-                  math.min(distSquared, sphereRadiusSquared * 0.999));
+            0.0,
+            sphereRadiusSquared -
+                math.min(distSquared, sphereRadiusSquared * 0.999),
+          );
           final z = math.sqrt(safeZSquared);
 
           // For edge pixels, scale position to stay on sphere surface
@@ -756,22 +780,26 @@ class RotatingGlobeState extends State<RotatingGlobe>
           final a11 = (c11 >> 24) & 0xFF;
 
           // Bilinear interpolation for day surface
-          var r = ((r00 * (1 - fx) + r10 * fx) * (1 - fy) +
-                  (r01 * (1 - fx) + r11 * fx) * fy)
-              .round()
-              .clamp(0, 255);
-          var g = ((g00 * (1 - fx) + g10 * fx) * (1 - fy) +
-                  (g01 * (1 - fx) + g11 * fx) * fy)
-              .round()
-              .clamp(0, 255);
-          var b = ((b00 * (1 - fx) + b10 * fx) * (1 - fy) +
-                  (b01 * (1 - fx) + b11 * fx) * fy)
-              .round()
-              .clamp(0, 255);
-          var a = ((a00 * (1 - fx) + a10 * fx) * (1 - fy) +
-                  (a01 * (1 - fx) + a11 * fx) * fy)
-              .round()
-              .clamp(0, 255);
+          var r =
+              ((r00 * (1 - fx) + r10 * fx) * (1 - fy) +
+                      (r01 * (1 - fx) + r11 * fx) * fy)
+                  .round()
+                  .clamp(0, 255);
+          var g =
+              ((g00 * (1 - fx) + g10 * fx) * (1 - fy) +
+                      (g01 * (1 - fx) + g11 * fx) * fy)
+                  .round()
+                  .clamp(0, 255);
+          var b =
+              ((b00 * (1 - fx) + b10 * fx) * (1 - fy) +
+                      (b01 * (1 - fx) + b11 * fx) * fy)
+                  .round()
+                  .clamp(0, 255);
+          var a =
+              ((a00 * (1 - fx) + a10 * fx) * (1 - fy) +
+                      (a01 * (1 - fx) + a11 * fx) * fy)
+                  .round()
+                  .clamp(0, 255);
 
           // Apply day/night blending if enabled
           if (hasDayNightCycle) {
@@ -779,8 +807,8 @@ class RotatingGlobeState extends State<RotatingGlobe>
 
             // Get night surface colors
             final nightWidth = widget.controller.nightSurface!.width.toDouble();
-            final nightHeight =
-                widget.controller.nightSurface!.height.toDouble();
+            final nightHeight = widget.controller.nightSurface!.height
+                .toDouble();
             final nightXRate = (nightWidth - 1) / (2.0 * math.pi);
             final nightYRate = (nightHeight - 1) / math.pi;
 
@@ -798,14 +826,24 @@ class RotatingGlobeState extends State<RotatingGlobe>
             final nfx = nx0 - nx0Floor;
             final nfy = ny0 - ny0Floor;
 
-            final nc00 = widget.controller.nightSurfaceProcessed![
-                (ny0ClampedFloor * nightWidth + nx0ClampedFloor).toInt()];
-            final nc10 = widget.controller.nightSurfaceProcessed![
-                (ny0ClampedFloor * nightWidth + nx0Ceil).toInt()];
-            final nc01 = widget.controller.nightSurfaceProcessed![
-                (ny0Ceil * nightWidth + nx0ClampedFloor).toInt()];
-            final nc11 = widget.controller.nightSurfaceProcessed![
-                (ny0Ceil * nightWidth + nx0Ceil).toInt()];
+            final nc00 =
+                widget.controller.nightSurfaceProcessed![(ny0ClampedFloor *
+                            nightWidth +
+                        nx0ClampedFloor)
+                    .toInt()];
+            final nc10 =
+                widget.controller.nightSurfaceProcessed![(ny0ClampedFloor *
+                            nightWidth +
+                        nx0Ceil)
+                    .toInt()];
+            final nc01 =
+                widget.controller.nightSurfaceProcessed![(ny0Ceil * nightWidth +
+                        nx0ClampedFloor)
+                    .toInt()];
+            final nc11 =
+                widget.controller.nightSurfaceProcessed![(ny0Ceil * nightWidth +
+                        nx0Ceil)
+                    .toInt()];
 
             // Extract RGBA components for night surface
             final nr00 = (nc00 >> 0) & 0xFF;
@@ -829,22 +867,26 @@ class RotatingGlobeState extends State<RotatingGlobe>
             final na11 = (nc11 >> 24) & 0xFF;
 
             // Bilinear interpolation for night surface
-            final nr = ((nr00 * (1 - nfx) + nr10 * nfx) * (1 - nfy) +
-                    (nr01 * (1 - nfx) + nr11 * nfx) * nfy)
-                .round()
-                .clamp(0, 255);
-            final ng = ((ng00 * (1 - nfx) + ng10 * nfx) * (1 - nfy) +
-                    (ng01 * (1 - nfx) + ng11 * nfx) * nfy)
-                .round()
-                .clamp(0, 255);
-            final nb = ((nb00 * (1 - nfx) + nb10 * nfx) * (1 - nfy) +
-                    (nb01 * (1 - nfx) + nb11 * nfx) * nfy)
-                .round()
-                .clamp(0, 255);
-            final na = ((na00 * (1 - nfx) + na10 * nfx) * (1 - nfy) +
-                    (na01 * (1 - nfx) + na11 * nfx) * nfy)
-                .round()
-                .clamp(0, 255);
+            final nr =
+                ((nr00 * (1 - nfx) + nr10 * nfx) * (1 - nfy) +
+                        (nr01 * (1 - nfx) + nr11 * nfx) * nfy)
+                    .round()
+                    .clamp(0, 255);
+            final ng =
+                ((ng00 * (1 - nfx) + ng10 * nfx) * (1 - nfy) +
+                        (ng01 * (1 - nfx) + ng11 * nfx) * nfy)
+                    .round()
+                    .clamp(0, 255);
+            final nb =
+                ((nb00 * (1 - nfx) + nb10 * nfx) * (1 - nfy) +
+                        (nb01 * (1 - nfx) + nb11 * nfx) * nfy)
+                    .round()
+                    .clamp(0, 255);
+            final na =
+                ((na00 * (1 - nfx) + na10 * nfx) * (1 - nfy) +
+                        (na01 * (1 - nfx) + na11 * nfx) * nfy)
+                    .round()
+                    .clamp(0, 255);
 
             // Blend day and night colors based on dayFactor
             r = (r * dayFactor + nr * (1 - dayFactor)).round().clamp(0, 255);
@@ -868,20 +910,25 @@ class RotatingGlobeState extends State<RotatingGlobe>
     }
 
     final completer = Completer<SphereImage>();
-    ui.decodeImageFromPixels(spherePixels.buffer.asUint8List(), width.toInt(),
-        height.toInt(), ui.PixelFormat.rgba8888, (image) {
-      final sphereImage = SphereImage(
-        image: image,
-        radius: sphereRadius,
-        origin: Offset(-minX, -minY),
-        offset: Offset(maxWidth / 2, maxHeight / 2),
-      );
-      // Cache the result
-      _cachedSphereImage = sphereImage;
-      _updateCacheParams(maxWidth, maxHeight);
-      _isBuildingSphere = false;
-      completer.complete(sphereImage);
-    });
+    ui.decodeImageFromPixels(
+      spherePixels.buffer.asUint8List(),
+      width.toInt(),
+      height.toInt(),
+      ui.PixelFormat.rgba8888,
+      (image) {
+        final sphereImage = SphereImage(
+          image: image,
+          radius: sphereRadius,
+          origin: Offset(-minX, -minY),
+          offset: Offset(maxWidth / 2, maxHeight / 2),
+        );
+        // Cache the result
+        _cachedSphereImage = sphereImage;
+        _updateCacheParams(maxWidth, maxHeight);
+        _isBuildingSphere = false;
+        completer.complete(sphereImage);
+      },
+    );
     return completer.future;
   }
 
@@ -936,8 +983,10 @@ class RotatingGlobeState extends State<RotatingGlobe>
   /// Apply smooth animated zoom like globe.gl
   /// Uses logarithmic scaling for more natural zoom feel
   void _animateZoomTo(double targetZoom) {
-    final clampedTarget =
-        targetZoom.clamp(widget.controller.minZoom, widget.controller.maxZoom);
+    final clampedTarget = targetZoom.clamp(
+      widget.controller.minZoom,
+      widget.controller.maxZoom,
+    );
     if ((clampedTarget - widget.controller.zoom).abs() < 0.001) return;
 
     _initialZoom = widget.controller.zoom;
@@ -958,8 +1007,10 @@ class RotatingGlobeState extends State<RotatingGlobe>
     // Ensure the zoom value is valid before applying
     if (!tempZoom.isFinite) return;
 
-    widget.controller.zoom =
-        tempZoom.clamp(widget.controller.minZoom, widget.controller.maxZoom);
+    widget.controller.zoom = tempZoom.clamp(
+      widget.controller.minZoom,
+      widget.controller.maxZoom,
+    );
     widget.onZoomChanged?.call(widget.controller.zoom);
     setState(() {});
   }
@@ -977,8 +1028,10 @@ class RotatingGlobeState extends State<RotatingGlobe>
     if (!zoomDelta.isFinite) return;
 
     final currentZoom = widget.controller.zoom;
-    final targetZoom = (currentZoom + zoomDelta)
-        .clamp(widget.controller.minZoom, widget.controller.maxZoom);
+    final targetZoom = (currentZoom + zoomDelta).clamp(
+      widget.controller.minZoom,
+      widget.controller.maxZoom,
+    );
 
     if ((targetZoom - currentZoom).abs() < 0.0001) return;
 
@@ -998,7 +1051,10 @@ class RotatingGlobeState extends State<RotatingGlobe>
   /// Apply free zoom - zoom towards/away from cursor position
   /// The point under the cursor stays fixed while the entire view scales
   void _applyFreeZoom(
-      double currentZoom, double targetZoom, Offset cursorScreenPos) {
+    double currentZoom,
+    double targetZoom,
+    Offset cursorScreenPos,
+  ) {
     // Get screen center
     final screenSize = MediaQuery.of(context).size;
     final screenCenter = Offset(screenSize.width / 2, screenSize.height / 2);
@@ -1072,15 +1128,18 @@ class RotatingGlobeState extends State<RotatingGlobe>
     }
     if (widget.controller.surface == null) return null;
 
-    final hasDayNightCycle = widget.controller.isDayNightCycleEnabled &&
+    final hasDayNightCycle =
+        widget.controller.isDayNightCycleEnabled &&
         widget.controller.nightSurface != null;
 
     // Check if we need to recreate the shader (textures changed or shader needs recreation)
     final daySurface = widget.controller.surface!;
-    final nightSurface =
-        hasDayNightCycle ? widget.controller.nightSurface : null;
+    final nightSurface = hasDayNightCycle
+        ? widget.controller.nightSurface
+        : null;
 
-    final needsRecreation = _cachedShader == null ||
+    final needsRecreation =
+        _cachedShader == null ||
         _sphereShaderNeedsRecreation ||
         _cachedDaySurface != daySurface ||
         _cachedNightSurface != nightSurface;
@@ -1132,8 +1191,10 @@ class RotatingGlobeState extends State<RotatingGlobe>
       return null;
     }
 
-    final sphereCenter =
-        Offset(constraints.maxWidth / 2, constraints.maxHeight / 2);
+    final sphereCenter = Offset(
+      constraints.maxWidth / 2,
+      constraints.maxHeight / 2,
+    );
 
     return CustomPaint(
       painter: SphereShaderPainter(
@@ -1287,7 +1348,8 @@ class RotatingGlobeState extends State<RotatingGlobe>
 
     // Update visibleConnections map for label positioning
     for (final arcData in _arcRenderData) {
-      final isVisible = arcData.isStartVisible ||
+      final isVisible =
+          arcData.isStartVisible ||
           arcData.isEndVisible ||
           arcData.isMidVisible;
       if (isVisible) {
@@ -1324,8 +1386,9 @@ class RotatingGlobeState extends State<RotatingGlobe>
   }
 
   /// Build the Globe.GL-style foreground painter
-  GpuForegroundPainter _buildGpuForegroundPainter(
-      {bool skipSatelliteShapes = false}) {
+  GpuForegroundPainter _buildGpuForegroundPainter({
+    bool skipSatelliteShapes = false,
+  }) {
     return GpuForegroundPainter(
       points: _pointRenderData,
       arcs: _arcRenderData,
@@ -1407,11 +1470,11 @@ class RotatingGlobeState extends State<RotatingGlobe>
 
     final offsetX = widget.controller.isBackgroundFollowingSphereRotation
         ? rotationZ *
-            radiansToDegrees(widget.radius * math.pow((2 * math.pi), 2) / 360)
+              radiansToDegrees(widget.radius * math.pow((2 * math.pi), 2) / 360)
         : 0.0;
     final offsetY = widget.controller.isBackgroundFollowingSphereRotation
         ? rotationY *
-            radiansToDegrees(widget.radius * math.pow((2 * math.pi), 2) / 360)
+              radiansToDegrees(widget.radius * math.pow((2 * math.pi), 2) / 360)
         : 0.0;
 
     // If shader manager needs reloading (after forceReload), trigger async reload
@@ -1436,7 +1499,8 @@ class RotatingGlobeState extends State<RotatingGlobe>
         (_backgroundShaderManager.isReady || _cachedBackgroundShader != null) &&
         _backgroundShaderErrorCount < _maxShaderErrors) {
       // Check if we need to recreate the shader (texture changed or shader needs recreation)
-      final needsRecreation = _cachedBackgroundShader == null ||
+      final needsRecreation =
+          _cachedBackgroundShader == null ||
           _backgroundShaderNeedsRecreation ||
           _cachedBackgroundTexture != background;
 
@@ -1594,9 +1658,12 @@ class RotatingGlobeState extends State<RotatingGlobe>
                         child: CustomPaint(
                           // Use Canvas for all foreground elements including satellites
                           painter: _buildGpuForegroundPainter(
-                              skipSatelliteShapes: false),
-                          size:
-                              Size(constraints.maxWidth, constraints.maxHeight),
+                            skipSatelliteShapes: false,
+                          ),
+                          size: Size(
+                            constraints.maxWidth,
+                            constraints.maxHeight,
+                          ),
                         ),
                       );
                     },
@@ -1650,9 +1717,12 @@ class RotatingGlobeState extends State<RotatingGlobe>
                             child: CustomPaint(
                               // Use Canvas-based rendering for all foreground elements
                               painter: _buildGpuForegroundPainter(
-                                  skipSatelliteShapes: false),
+                                skipSatelliteShapes: false,
+                              ),
                               size: Size(
-                                  constraints.maxWidth, constraints.maxHeight),
+                                constraints.maxWidth,
+                                constraints.maxHeight,
+                              ),
                             ),
                           );
                         },
@@ -1672,311 +1742,366 @@ class RotatingGlobeState extends State<RotatingGlobe>
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenHeight = MediaQuery.of(context).size.height;
+    return LayoutBuilder(
+      builder: (context, viewportConstraints) {
+        final screenSize = MediaQuery.sizeOf(context);
+        final screenWidth = viewportConstraints.hasBoundedWidth
+            ? viewportConstraints.maxWidth
+            : screenSize.width;
+        final screenHeight = viewportConstraints.hasBoundedHeight
+            ? viewportConstraints.maxHeight
+            : screenSize.height;
 
-    double maxWidth = screenWidth;
-    double maxHeight = screenHeight;
-    if (convertedRadius() * 2 > maxWidth) {
-      maxWidth = convertedRadius() * 2 + 50;
-    }
-    if (convertedRadius() * 2 > maxHeight) {
-      maxHeight = convertedRadius() * 2 + 50;
-    }
+        double maxWidth = screenWidth;
+        double maxHeight = screenHeight;
+        if (convertedRadius() * 2 > maxWidth) {
+          maxWidth = convertedRadius() * 2 + 50;
+        }
+        if (convertedRadius() * 2 > maxHeight) {
+          maxHeight = convertedRadius() * 2 + 50;
+        }
 
-    double left = 0;
-    if (screenWidth < maxWidth) {
-      left = (maxWidth - screenWidth) / 2;
-    }
-    double top = 0;
-    if (screenHeight < maxHeight) {
-      top = (maxHeight - screenHeight) / 2;
-    }
+        double left = 0;
+        if (screenWidth < maxWidth) {
+          left = (maxWidth - screenWidth) / 2;
+        }
+        double top = 0;
+        if (screenHeight < maxHeight) {
+          top = (maxHeight - screenHeight) / 2;
+        }
 
-    // Pan offsets are only used in free zoom mode (zoomToMousePosition=true)
-    // In center zoom mode, the globe stays centered
-    final panOffsetX = widget.controller.zoomToMousePosition
-        ? widget.controller.panOffsetX
-        : 0.0;
-    final panOffsetY = widget.controller.zoomToMousePosition
-        ? widget.controller.panOffsetY
-        : 0.0;
+        // Pan offsets are only used in free zoom mode (zoomToMousePosition=true)
+        // In center zoom mode, the globe stays centered
+        final panOffsetX = widget.controller.zoomToMousePosition
+            ? widget.controller.panOffsetX
+            : 0.0;
+        final panOffsetY = widget.controller.zoomToMousePosition
+            ? widget.controller.panOffsetY
+            : 0.0;
 
-    return Stack(
-      children: [
-        // Background - stays fixed, fills the screen
-        LayoutBuilder(builder: (context, constraints) {
-          return widget.controller.background == null
-              ? const SizedBox.shrink()
-              : RepaintBoundary(
-                  child: _buildBackground(constraints),
-                );
-        }),
-        Positioned(
-          left: -left + panOffsetX,
-          top: -top + panOffsetY,
-          width: maxWidth,
-          height: maxHeight,
-          child: Listener(
-            onPointerSignal: (PointerSignalEvent event) {
-              // Handle scroll wheel zoom with smooth animation
-              if (event is PointerScrollEvent &&
-                  widget.controller.isZoomEnabled) {
-                // Use the screen position for zoom-to-cursor, not local position
-                // This gives us the actual cursor position on the screen
-                _onScrollZoom(event.scrollDelta.dy,
-                    screenPosition: event.position);
-              }
-            },
-            child: InteractiveViewer(
-              // Disable InteractiveViewer's scale to use our custom zoom handling
-              scaleEnabled: false,
-              panEnabled: false,
-              trackpadScrollCausesScale: false, // We handle this ourselves now
-              onInteractionStart: (ScaleStartDetails details) {
-                _lastRotationX = rotationX;
-                _lastRotationZ = rotationZ;
-                _lastFocalPoint = details.focalPoint;
-                _lastScale = 1.0; // Reset scale tracking
-
-                if (_decelerationController.isAnimating) {
-                  _decelerationController.stop();
-                  _decelerationController.reset();
-                }
-
-                // Stop zoom animation when starting new gesture
-                if (_zoomAnimationController?.isAnimating == true) {
-                  _zoomAnimationController?.stop();
-                }
-
-                if (widget.controller.isRotating) {
-                  widget.controller.rotationController.stop();
-                }
-                setState(() {});
+        return Stack(
+          children: [
+            // Background - stays fixed, fills the screen
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return widget.controller.background == null
+                    ? const SizedBox.shrink()
+                    : RepaintBoundary(
+                        child: _buildBackground(constraints),
+                      );
               },
-              onInteractionUpdate: (ScaleUpdateDetails details) {
-                if (widget.controller.isZoomEnabled && details.scale != 1.0) {
-                  // Use incremental scale changes for smoother pinch zoom
-                  final scaleDelta = details.scale - _lastScale;
-                  _lastScale = details.scale;
-                  // Logarithmic zoom: change is proportional to current zoom
-                  final zoomDelta = scaleDelta *
-                      widget.controller.zoomSensitivity *
-                      (1.0 + widget.controller.zoom * 0.3);
-                  _onZoomUpdated(zoomDelta);
-                }
-                final offset = details.focalPoint - _lastFocalPoint;
-                // Apply pan sensitivity that adjusts with zoom level for consistent feel
-                final panFactor = _panSensitivity;
-                rotationX = _clampVerticalRotation(_lastRotationX +
-                    (offset.dy / convertedRadius()) * panFactor);
-                rotationZ = adjustModRotation(_lastRotationZ -
-                    (offset.dx / convertedRadius()) * panFactor);
-                rotationY = -rotationX;
-                setState(() {});
-              },
-              onInteractionEnd: (ScaleEndDetails details) {
-                _lastScale = 1.0; // Reset scale tracking
-                final velocity = details.velocity.pixelsPerSecond;
-                final velocityMagnitude = velocity.distance;
+            ),
+            Positioned(
+              left: -left + panOffsetX,
+              top: -top + panOffsetY,
+              width: maxWidth,
+              height: maxHeight,
+              child: Listener(
+                onPointerSignal: (PointerSignalEvent event) {
+                  // Handle scroll wheel zoom with smooth animation
+                  if (event is PointerScrollEvent &&
+                      widget.controller.isZoomEnabled) {
+                    // Use the screen position for zoom-to-cursor, not local position
+                    // This gives us the actual cursor position on the screen
+                    _onScrollZoom(
+                      event.scrollDelta.dy,
+                      screenPosition: event.position,
+                    );
+                  }
+                },
+                child: InteractiveViewer(
+                  // Disable InteractiveViewer's scale to use our custom zoom handling
+                  scaleEnabled: false,
+                  panEnabled: false,
+                  trackpadScrollCausesScale:
+                      false, // We handle this ourselves now
+                  onInteractionStart: (ScaleStartDetails details) {
+                    _lastRotationX = rotationX;
+                    _lastRotationZ = rotationZ;
+                    _lastFocalPoint = details.focalPoint;
+                    _lastScale = 1.0; // Reset scale tracking
 
-                // Lower threshold for smoother start of deceleration
-                if (velocityMagnitude > 30) {
-                  // Adjust velocity factor based on zoom for consistent feel
-                  // Higher zoom = less momentum, lower zoom = more momentum
-                  final zoomFactor = 1.0 / (1.0 + widget.controller.zoom * 0.3);
-                  final velocityFactor =
-                      (velocityMagnitude / 4000.0) * zoomFactor;
+                    if (_decelerationController.isAnimating) {
+                      _decelerationController.stop();
+                      _decelerationController.reset();
+                    }
 
-                  final panFactor = _panSensitivity;
-                  _angularVelocityX =
-                      (velocity.dy / convertedRadius()) * panFactor;
-                  _angularVelocityZ =
-                      (-velocity.dx / convertedRadius()) * panFactor;
+                    // Stop zoom animation when starting new gesture
+                    if (_zoomAnimationController?.isAnimating == true) {
+                      _zoomAnimationController?.stop();
+                    }
 
-                  _initialRotationX = rotationX;
-                  _initialRotationZ = rotationZ;
+                    if (widget.controller.isRotating) {
+                      widget.controller.rotationController.stop();
+                    }
+                    setState(() {});
+                  },
+                  onInteractionUpdate: (ScaleUpdateDetails details) {
+                    if (widget.controller.isZoomEnabled &&
+                        details.scale != 1.0) {
+                      // Use incremental scale changes for smoother pinch zoom
+                      final scaleDelta = details.scale - _lastScale;
+                      _lastScale = details.scale;
+                      // Logarithmic zoom: change is proportional to current zoom
+                      final zoomDelta =
+                          scaleDelta *
+                          widget.controller.zoomSensitivity *
+                          (1.0 + widget.controller.zoom * 0.3);
+                      _onZoomUpdated(zoomDelta);
+                    }
+                    final offset = details.focalPoint - _lastFocalPoint;
+                    // Apply pan sensitivity that adjusts with zoom level for consistent feel
+                    final panFactor = _panSensitivity;
+                    rotationX = _clampVerticalRotation(
+                      _lastRotationX +
+                          (offset.dy / convertedRadius()) * panFactor,
+                    );
+                    rotationZ = adjustModRotation(
+                      _lastRotationZ -
+                          (offset.dx / convertedRadius()) * panFactor,
+                    );
+                    rotationY = -rotationX;
+                    setState(() {});
+                  },
+                  onInteractionEnd: (ScaleEndDetails details) {
+                    _lastScale = 1.0; // Reset scale tracking
+                    final velocity = details.velocity.pixelsPerSecond;
+                    final velocityMagnitude = velocity.distance;
 
-                  _targetRotationX = _clampVerticalRotation(
-                      rotationX + _angularVelocityX * velocityFactor);
-                  _targetRotationZ =
-                      rotationZ + _angularVelocityZ * velocityFactor;
+                    // Lower threshold for smoother start of deceleration
+                    if (velocityMagnitude > 30) {
+                      // Adjust velocity factor based on zoom for consistent feel
+                      // Higher zoom = less momentum, lower zoom = more momentum
+                      final zoomFactor =
+                          1.0 / (1.0 + widget.controller.zoom * 0.3);
+                      final velocityFactor =
+                          (velocityMagnitude / 4000.0) * zoomFactor;
 
-                  _decelerationController.forward(from: 0.0);
-                }
+                      final panFactor = _panSensitivity;
+                      _angularVelocityX =
+                          (velocity.dy / convertedRadius()) * panFactor;
+                      _angularVelocityZ =
+                          (-velocity.dx / convertedRadius()) * panFactor;
 
-                if (widget.controller.isRotating) {
-                  widget.controller.rotationController.forward(
-                      from: widget.controller.rotationController.value);
-                }
-              },
-              child: GestureDetector(
-                onTapDown: onTapEvent,
-                child: Listener(
-                  onPointerHover: onHover,
-                  child: LayoutBuilder(
-                    builder:
-                        (BuildContext context, BoxConstraints constraints) {
-                      final updatedCenter = Offset(
-                          constraints.maxWidth / 2, constraints.maxHeight / 2);
-                      if (updatedCenter != center) {
-                        Future.delayed(Duration.zero, () {
-                          setState(() {
-                            center = updatedCenter;
-                          });
-                        });
-                      }
-                      return Stack(
-                        children: [
-                          Positioned(
-                            top: widget.alignment.y * constraints.maxHeight / 2,
-                            left: widget.alignment.x * constraints.maxWidth / 2,
-                            child: _buildAtmosphericGlow(
-                              constraints,
-                              _buildSphereContent(constraints),
-                            ),
-                          ),
-                          if (visiblePoints.isNotEmpty)
-                            ...visiblePoints.entries.map(
-                              (e) {
-                                final point = widget.controller.points
-                                    .where(
-                                      (element) => element.id == e.key,
-                                    )
-                                    .firstOrNull;
-                                final pos = e.value.position;
-                                if (point == null ||
-                                    point.labelBuilder == null ||
-                                    pos == null) {
-                                  return null;
-                                }
+                      _initialRotationX = rotationX;
+                      _initialRotationZ = rotationZ;
 
-                                // Only measure label size once when it first appears
-                                // This prevents setState loops during animation
-                                if (e.value.size == null &&
-                                    !_labelSizeUpdateScheduled) {
-                                  WidgetsBinding.instance
-                                      .addPostFrameCallback((_) {
-                                    if (!mounted) return;
-                                    final box = e.value.key.currentContext
-                                        ?.findRenderObject() as RenderBox?;
-                                    if (box?.size != null &&
-                                        visiblePoints.containsKey(e.key)) {
-                                      visiblePoints.update(
-                                          e.key,
-                                          (value) => value.copyWith(
-                                                size: box?.size,
-                                              ));
-                                      // Only schedule one setState for all pending size updates
-                                      if (!_labelSizeUpdateScheduled) {
-                                        _labelSizeUpdateScheduled = true;
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                          if (mounted) {
-                                            _labelSizeUpdateScheduled = false;
-                                            setState(() {});
-                                          }
-                                        });
-                                      }
+                      _targetRotationX = _clampVerticalRotation(
+                        rotationX + _angularVelocityX * velocityFactor,
+                      );
+                      _targetRotationZ =
+                          rotationZ + _angularVelocityZ * velocityFactor;
+
+                      _decelerationController.forward(from: 0.0);
+                    }
+
+                    if (widget.controller.isRotating) {
+                      widget.controller.rotationController.forward(
+                        from: widget.controller.rotationController.value,
+                      );
+                    }
+                  },
+                  child: GestureDetector(
+                    onTapDown: onTapEvent,
+                    child: Listener(
+                      onPointerHover: onHover,
+                      child: LayoutBuilder(
+                        builder: (BuildContext context, BoxConstraints constraints) {
+                          final updatedCenter = Offset(
+                            constraints.maxWidth / 2,
+                            constraints.maxHeight / 2,
+                          );
+                          if (updatedCenter != center) {
+                            Future.delayed(Duration.zero, () {
+                              setState(() {
+                                center = updatedCenter;
+                              });
+                            });
+                          }
+                          return Stack(
+                            children: [
+                              Positioned(
+                                top:
+                                    widget.alignment.y *
+                                    constraints.maxHeight /
+                                    2,
+                                left:
+                                    widget.alignment.x *
+                                    constraints.maxWidth /
+                                    2,
+                                child: _buildAtmosphericGlow(
+                                  constraints,
+                                  _buildSphereContent(constraints),
+                                ),
+                              ),
+                              if (visiblePoints.isNotEmpty)
+                                ...visiblePoints.entries.map(
+                                  (e) {
+                                    final point = widget.controller.points
+                                        .where(
+                                          (element) => element.id == e.key,
+                                        )
+                                        .firstOrNull;
+                                    final pos = e.value.position;
+                                    if (point == null ||
+                                        point.labelBuilder == null ||
+                                        pos == null) {
+                                      return null;
                                     }
-                                  });
-                                }
 
-                                double width = e.value.size?.width ?? 0;
-                                double height = e.value.size?.height ?? 0;
-                                return Positioned(
-                                    key: e.value.key,
-                                    left: pos.dx -
-                                        point.labelOffset.dx -
-                                        (width / 2),
-                                    top: pos.dy - point.labelOffset.dy - height,
-                                    child: RepaintBoundary(
-                                      child: point.labelBuilder!(
+                                    // Only measure label size once when it first appears
+                                    // This prevents setState loops during animation
+                                    if (e.value.size == null &&
+                                        !_labelSizeUpdateScheduled) {
+                                      WidgetsBinding.instance.addPostFrameCallback((
+                                        _,
+                                      ) {
+                                        if (!mounted) return;
+                                        final box =
+                                            e.value.key.currentContext
+                                                    ?.findRenderObject()
+                                                as RenderBox?;
+                                        if (box?.size != null &&
+                                            visiblePoints.containsKey(e.key)) {
+                                          visiblePoints.update(
+                                            e.key,
+                                            (value) => value.copyWith(
+                                              size: box?.size,
+                                            ),
+                                          );
+                                          // Only schedule one setState for all pending size updates
+                                          if (!_labelSizeUpdateScheduled) {
+                                            _labelSizeUpdateScheduled = true;
+                                            WidgetsBinding.instance
+                                                .addPostFrameCallback((_) {
+                                                  if (mounted) {
+                                                    _labelSizeUpdateScheduled =
+                                                        false;
+                                                    setState(() {});
+                                                  }
+                                                });
+                                          }
+                                        }
+                                      });
+                                    }
+
+                                    double width = e.value.size?.width ?? 0;
+                                    double height = e.value.size?.height ?? 0;
+                                    return Positioned(
+                                      key: e.value.key,
+                                      left:
+                                          pos.dx -
+                                          point.labelOffset.dx -
+                                          (width / 2),
+                                      top:
+                                          pos.dy -
+                                          point.labelOffset.dy -
+                                          height,
+                                      child: RepaintBoundary(
+                                        child:
+                                            point.labelBuilder!(
                                               context,
                                               point,
                                               e.value.isHovering,
-                                              e.value.isVisible) ??
-                                          Container(),
-                                    ));
-                              },
-                            ).whereType<Widget>(),
-                          if (visibleConnections.isNotEmpty)
-                            ...visibleConnections.entries.map(
-                              (e) {
-                                final connection = widget.controller.connections
-                                    .where(
-                                      (element) => element.id == e.key,
-                                    )
-                                    .firstOrNull;
-                                final pos = e.value.position;
-                                if (connection == null ||
-                                    connection.labelBuilder == null ||
-                                    pos == null) {
-                                  return null;
-                                }
-
-                                // Only measure label size once when it first appears
-                                // This prevents setState loops during animation
-                                if (e.value.size == null &&
-                                    !_labelSizeUpdateScheduled) {
-                                  WidgetsBinding.instance
-                                      .addPostFrameCallback((_) {
-                                    if (!mounted) return;
-                                    final box = e.value.key.currentContext
-                                        ?.findRenderObject() as RenderBox?;
-                                    if (box?.size != null &&
-                                        visibleConnections.containsKey(e.key)) {
-                                      visibleConnections.update(
-                                        e.key,
-                                        (value) => value.copyWith(
-                                          size: box?.size,
-                                        ),
-                                      );
-                                      // Only schedule one setState for all pending size updates
-                                      if (!_labelSizeUpdateScheduled) {
-                                        _labelSizeUpdateScheduled = true;
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                          if (mounted) {
-                                            _labelSizeUpdateScheduled = false;
-                                            setState(() {});
-                                          }
-                                        });
-                                      }
+                                              e.value.isVisible,
+                                            ) ??
+                                            Container(),
+                                      ),
+                                    );
+                                  },
+                                ).whereType<Widget>(),
+                              if (visibleConnections.isNotEmpty)
+                                ...visibleConnections.entries.map(
+                                  (e) {
+                                    final connection = widget
+                                        .controller
+                                        .connections
+                                        .where(
+                                          (element) => element.id == e.key,
+                                        )
+                                        .firstOrNull;
+                                    final pos = e.value.position;
+                                    if (connection == null ||
+                                        connection.labelBuilder == null ||
+                                        pos == null) {
+                                      return null;
                                     }
-                                  });
-                                }
 
-                                double width = e.value.size?.width ?? 0;
-                                double height = e.value.size?.height ?? 0;
-                                return Positioned(
-                                    key: e.value.key,
-                                    left: pos.dx -
-                                        connection.labelOffset.dx -
-                                        (width / 2),
-                                    top: pos.dy -
-                                        connection.labelOffset.dy -
-                                        height,
-                                    child: RepaintBoundary(
-                                      child: connection.labelBuilder!(
+                                    // Only measure label size once when it first appears
+                                    // This prevents setState loops during animation
+                                    if (e.value.size == null &&
+                                        !_labelSizeUpdateScheduled) {
+                                      WidgetsBinding.instance.addPostFrameCallback((
+                                        _,
+                                      ) {
+                                        if (!mounted) return;
+                                        final box =
+                                            e.value.key.currentContext
+                                                    ?.findRenderObject()
+                                                as RenderBox?;
+                                        if (box?.size != null &&
+                                            visibleConnections.containsKey(
+                                              e.key,
+                                            )) {
+                                          visibleConnections.update(
+                                            e.key,
+                                            (value) => value.copyWith(
+                                              size: box?.size,
+                                            ),
+                                          );
+                                          // Only schedule one setState for all pending size updates
+                                          if (!_labelSizeUpdateScheduled) {
+                                            _labelSizeUpdateScheduled = true;
+                                            WidgetsBinding.instance
+                                                .addPostFrameCallback((_) {
+                                                  if (mounted) {
+                                                    _labelSizeUpdateScheduled =
+                                                        false;
+                                                    setState(() {});
+                                                  }
+                                                });
+                                          }
+                                        }
+                                      });
+                                    }
+
+                                    double width = e.value.size?.width ?? 0;
+                                    double height = e.value.size?.height ?? 0;
+                                    return Positioned(
+                                      key: e.value.key,
+                                      left:
+                                          pos.dx -
+                                          connection.labelOffset.dx -
+                                          (width / 2),
+                                      top:
+                                          pos.dy -
+                                          connection.labelOffset.dy -
+                                          height,
+                                      child: RepaintBoundary(
+                                        child:
+                                            connection.labelBuilder!(
                                               context,
                                               connection,
                                               e.value.isHovering,
-                                              e.value.isVisible) ??
-                                          Container(),
-                                    ));
-                              },
-                            ).whereType<Widget>(),
-                        ],
-                      );
-                    },
+                                              e.value.isVisible,
+                                            ) ??
+                                            Container(),
+                                      ),
+                                    );
+                                  },
+                                ).whereType<Widget>(),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        )
-      ],
+          ],
+        );
+      },
     );
   }
 }

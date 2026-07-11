@@ -3,6 +3,136 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:traveling_app/service/travel_data.dart';
 import 'package:traveling_app/styles/theme/app_common.dart';
 
+/// 应用统一输入框。
+///
+/// 集中管理输入文字、提示文字、填充背景、边框、聚焦态和禁用态样式，
+/// 同时保留单行、多行、密码、前后图标及键盘操作等原生输入能力。
+class TravelTextField extends StatelessWidget {
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final String? hintText;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
+  final VoidCallback? onTap;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final TextCapitalization textCapitalization;
+  final int? minLines;
+  final int? maxLines;
+  final int? maxLength;
+  final bool autofocus;
+  final bool enabled;
+  final bool readOnly;
+  final bool obscureText;
+  final bool autocorrect;
+  final bool enableSuggestions;
+
+  const TravelTextField({
+    super.key,
+    this.controller,
+    this.focusNode,
+    this.hintText,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.onChanged,
+    this.onSubmitted,
+    this.onTap,
+    this.keyboardType,
+    this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
+    this.minLines,
+    this.maxLines = 1,
+    this.maxLength,
+    this.autofocus = false,
+    this.enabled = true,
+    this.readOnly = false,
+    this.obscureText = false,
+    this.autocorrect = true,
+    this.enableSuggestions = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).extension<AppCommon>()!;
+    final radius = BorderRadius.circular(tokens.radiusMd);
+    final border = OutlineInputBorder(
+      borderRadius: radius,
+      borderSide: BorderSide(color: tokens.border.withValues(alpha: 0.9)),
+    );
+
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      autofocus: autofocus,
+      enabled: enabled,
+      readOnly: readOnly,
+      obscureText: obscureText,
+      autocorrect: autocorrect,
+      enableSuggestions: enableSuggestions,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      textCapitalization: textCapitalization,
+      minLines: minLines,
+      maxLines: maxLines,
+      maxLength: maxLength,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      onTap: onTap,
+      cursorColor: tokens.brand,
+      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        color: tokens.textPrimary,
+      ),
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: tokens.textMuted,
+        ),
+        prefixIcon: prefixIcon,
+        suffixIcon: suffixIcon,
+        prefixIconColor: tokens.textSecondary,
+        suffixIconColor: tokens.textSecondary,
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: 44,
+          minHeight: 44,
+        ),
+        suffixIconConstraints: const BoxConstraints(
+          minWidth: 44,
+          minHeight: 44,
+        ),
+        filled: true,
+        fillColor: enabled
+            ? tokens.surface.withValues(alpha: 0.78)
+            : tokens.surface.withValues(alpha: 0.45),
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: maxLines == 1 ? 13 : 14,
+        ),
+        border: border,
+        enabledBorder: border,
+        disabledBorder: border.copyWith(
+          borderSide: BorderSide(
+            color: tokens.border.withValues(alpha: 0.5),
+          ),
+        ),
+        focusedBorder: border.copyWith(
+          borderSide: BorderSide(color: tokens.brand, width: 1.5),
+        ),
+        errorBorder: border.copyWith(
+          borderSide: BorderSide(color: tokens.priceDown),
+        ),
+        focusedErrorBorder: border.copyWith(
+          borderSide: BorderSide(color: tokens.priceDown, width: 1.5),
+        ),
+      ),
+    );
+  }
+}
+
+/// 小型大写标签。
+///
+/// 用于表单字段名、分类名和卡片辅助信息，默认应用较宽的字间距。
 class TravelLabel extends StatelessWidget {
   final String text;
   final Color? color;
@@ -31,6 +161,9 @@ class TravelLabel extends StatelessWidget {
   }
 }
 
+/// 带定位图标的品牌或地点标识。
+///
+/// 默认显示 `GEOTRAVEL`，也可通过 [location] 显示当前地点名称。
 class TravelLocationIcon extends StatelessWidget {
   final String location;
 
@@ -43,7 +176,11 @@ class TravelLocationIcon extends StatelessWidget {
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Icon(Icons.location_searching_sharp, size: 28, color: tokens.textPrimarySameBtn),
+        Icon(
+          Icons.location_searching_sharp,
+          size: 28,
+          color: tokens.textPrimarySameBtn,
+        ),
         const SizedBox(width: 8),
         Text(
           location,
@@ -58,6 +195,9 @@ class TravelLocationIcon extends StatelessWidget {
   }
 }
 
+/// 紧凑的胶囊标签。
+///
+/// 适合展示状态、排名和分类，可选配前置图标及自定义填充、边框和文字颜色。
 class TravelPill extends StatelessWidget {
   final String text;
   final Color? fillColor;
@@ -102,6 +242,9 @@ class TravelPill extends StatelessWidget {
   }
 }
 
+/// 使用次级文字颜色的辅助标题。
+///
+/// 基于 [TravelLabel] 构建，适合层级较低的分组标题或说明标签。
 class TravelSecondaryTitle extends StatelessWidget {
   final String text;
   final double size;
@@ -122,15 +265,25 @@ class TravelSecondaryTitle extends StatelessWidget {
   }
 }
 
+/// 可配置的通用展示标题。
+///
+/// 默认使用 Fraunces 字体；设置 [isSystemFont] 后沿用主题字体，适合需要
+/// 自定义字号、颜色、字重、行高或字间距的标题场景。
 class TravelCommonTitle extends StatelessWidget {
   final String text;
   final double size;
   final Color? color;
   final FontWeight? fontWeight;
-  final FontStyle? fontStyle; // style
-  final double? height; // 行高
-  final double? letterSpacing; // 字间距
-  final bool? isSystemFont; // 是否使用系统字体（不受 GoogleFonts 影响）
+  final FontStyle? fontStyle;
+
+  /// 文本行高倍数。
+  final double? height;
+
+  /// 字符之间的额外间距。
+  final double? letterSpacing;
+
+  /// 是否使用主题字体，而不应用 Google Fonts。
+  final bool? isSystemFont;
 
   const TravelCommonTitle(
     this.text, {
@@ -165,6 +318,9 @@ class TravelCommonTitle extends StatelessWidget {
   }
 }
 
+/// 根据种子字符串生成稳定渐变的图片占位组件。
+///
+/// 相同 [seed] 会得到相同配色，适合真实图片尚未接入时维持可辨识的视觉占位。
 class TravelPlaceholderImage extends StatelessWidget {
   final String seed;
   final double? width;
@@ -212,6 +368,9 @@ class TravelPlaceholderImage extends StatelessWidget {
   }
 }
 
+/// 将旅行多维评分展示为一组横向进度条。
+///
+/// 固定显示氛围、照片、拥挤度和可达性，并使用主题中的不同语义色区分维度。
 class TravelRatingBars extends StatelessWidget {
   final MultiRating rating;
 
@@ -250,6 +409,9 @@ class TravelRatingBars extends StatelessWidget {
   }
 }
 
+/// [TravelRatingBars] 内部使用的单项评分行。
+///
+/// 负责组合维度标签、0 至 5 分的比例条和右侧数字分值。
 class _TravelRatingBar extends StatelessWidget {
   final String label;
   final double value;

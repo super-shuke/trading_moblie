@@ -124,14 +124,11 @@ class _NewTripViewState extends State<NewTripView> {
                 const SizedBox(height: 26),
                 const TravelLabel('TRIP NAME'),
                 const SizedBox(height: 8),
-                TextField(
+                TravelTextField(
                   controller: _nameController,
                   autofocus: true,
                   onChanged: (_) => setState(() {}),
-                  decoration: const InputDecoration(
-                    filled: true,
-                    hintText: 'e.g. Tokyo food crawl',
-                  ),
+                  hintText: 'e.g. Tokyo food crawl',
                 ),
                 const SizedBox(height: 20),
                 const TravelLabel('COUNTRY'),

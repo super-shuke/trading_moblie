@@ -88,39 +88,30 @@ class _AddTravelRecordViewState extends State<AddTravelRecordView> {
                 if (_type == TravelRecordType.country) ...[
                   const TravelLabel('COUNTRY'),
                   const SizedBox(height: 8),
-                  TextField(
+                  TravelTextField(
                     controller: _countryController,
                     autofocus: true,
                     onChanged: (_) => setState(() {}),
-                    decoration: const InputDecoration(
-                      filled: true,
-                      hintText: 'e.g. Portugal',
-                    ),
+                    hintText: 'e.g. Portugal',
                   ),
                 ] else ...[
                   const TravelLabel('CITY'),
                   const SizedBox(height: 8),
-                  TextField(
+                  TravelTextField(
                     controller: _cityController,
                     autofocus: true,
                     onChanged: (_) => setState(() {}),
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      filled: true,
-                      hintText: 'e.g. Lisbon',
-                    ),
+                    hintText: 'e.g. Lisbon',
                   ),
                   const SizedBox(height: 18),
                   const TravelLabel('PLACE'),
                   const SizedBox(height: 8),
-                  TextField(
+                  TravelTextField(
                     controller: _placeController,
                     onChanged: (_) => setState(() {}),
                     textInputAction: TextInputAction.next,
-                    decoration: const InputDecoration(
-                      filled: true,
-                      hintText: 'Shop, hotel, restaurant, or sight',
-                    ),
+                    hintText: 'Shop, hotel, restaurant, or sight',
                   ),
                   const SizedBox(height: 18),
                   const TravelLabel('CATEGORY'),
@@ -146,14 +137,11 @@ class _AddTravelRecordViewState extends State<AddTravelRecordView> {
                   const SizedBox(height: 18),
                   const TravelLabel('YOUR REVIEW'),
                   const SizedBox(height: 8),
-                  TextField(
+                  TravelTextField(
                     controller: _reviewController,
                     minLines: 4,
                     maxLines: 6,
-                    decoration: const InputDecoration(
-                      filled: true,
-                      hintText: 'What should another thoughtful traveler know?',
-                    ),
+                    hintText: 'What should another thoughtful traveler know?',
                   ),
                 ],
               ],

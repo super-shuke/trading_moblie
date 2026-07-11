@@ -244,7 +244,7 @@ class _AbstractMapPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.drawRect(
       Offset.zero & size,
-      Paint()..color = const Color(0xFF0B1726),
+      Paint()..color = const Color(0xCC0B1726),
     );
 
     final grid = Paint()

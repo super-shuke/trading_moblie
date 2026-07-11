@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:traveling_app/component/travel/geo_surface.dart';
+import 'package:traveling_app/component/travel/kit.dart';
 import 'package:traveling_app/store/travel/travel_store.dart';
 import 'package:traveling_app/styles/theme/app_common.dart';
 
@@ -230,19 +231,11 @@ class _PoiDetailsState extends State<PoiDetails> {
                       const SizedBox(height: 10),
                     ],
                     const SizedBox(height: 8),
-                    TextField(
+                    TravelTextField(
                       controller: _noteController,
                       minLines: 2,
                       maxLines: 4,
-                      decoration: InputDecoration(
-                        hintText: 'Share a useful, non-promotional note',
-                        filled: true,
-                        fillColor: tokens.surface,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide(color: tokens.border),
-                        ),
-                      ),
+                      hintText: 'Share a useful, non-promotional note',
                     ),
                     const SizedBox(height: 10),
                     Align(

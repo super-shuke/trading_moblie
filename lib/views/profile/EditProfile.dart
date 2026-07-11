@@ -162,25 +162,19 @@ class _EditProfileViewState extends State<EditProfileView> {
                 const SizedBox(height: 34),
                 const TravelLabel('NAME'),
                 const SizedBox(height: 9),
-                TextField(
+                TravelTextField(
                   controller: _nameController,
                   onChanged: (_) => setState(() {}),
                   textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    filled: true,
-                    hintText: 'Your name',
-                  ),
+                  hintText: 'Your name',
                 ),
                 const SizedBox(height: 24),
                 const TravelLabel('BIO'),
                 const SizedBox(height: 9),
-                TextField(
+                TravelTextField(
                   controller: _bioController,
                   maxLines: 2,
-                  decoration: const InputDecoration(
-                    filled: true,
-                    hintText: 'A line about you',
-                  ),
+                  hintText: 'A line about you',
                 ),
               ],
             ),

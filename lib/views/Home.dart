@@ -15,7 +15,16 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  bool _isGlobeInteracting = false;
+
   void _openSearch() => context.push('/search');
+
+  void _handleGlobeInteractionChanged(bool isInteracting) {
+    if (!mounted || _isGlobeInteracting == isInteracting) {
+      return;
+    }
+    setState(() => _isGlobeInteracting = isInteracting);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,61 +40,84 @@ class _HomeState extends State<Home> {
         child: SafeArea(
           bottom: false,
           child: GeoContent(
-            child: ListView(
-              padding: const EdgeInsets.only(top: 22, bottom: 112),
+            padding: EdgeInsets.zero,
+            child: Column(
               children: [
-                _ExploreHero(store: store, onSearch: _openSearch),
-                const SizedBox(height: 22),
-                GeoSectionHeader(
-                  title: 'Top destinations',
-                  actionLabel: 'See all',
-                  onAction: _openSearch,
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 300,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: store.cities.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 14),
-                    itemBuilder: (context, index) => _DestinationCard(
-                      city: store.cities[index],
-                      rank: index + 1,
-                    ),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: _ExploreHeader(
+                    store: store,
+                    onSearch: _openSearch,
                   ),
                 ),
-                const SizedBox(height: 24),
-                const GeoSectionHeader(title: 'Recommended for you'),
-                const SizedBox(height: 10),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: recommendations.length,
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 230,
-                        mainAxisExtent: 252,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
+                const SizedBox(height: 20),
+                Expanded(
+                  child: ListView(
+                    physics: _isGlobeInteracting
+                        ? const NeverScrollableScrollPhysics()
+                        : null,
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 110),
+                    children: [
+                      _ExploreGlobe(
+                        store: store,
+                        onInteractionChanged: _handleGlobeInteractionChanged,
                       ),
-                      itemBuilder: (context, index) => _PlaceCard(
-                        poi: recommendations[index],
-                        tag: index == 0
-                            ? 'FOR YOU'
-                            : index == 1
-                            ? 'QUIET FIND'
-                            : 'LOCAL PICK',
+                      const SizedBox(height: 22),
+                      GeoSectionHeader(
+                        title: 'Top destinations',
+                        actionLabel: 'See all',
+                        onAction: _openSearch,
                       ),
-                    );
-                  },
-                ),
-                if (recommendations.isEmpty)
-                  const GeoGlassCard(
-                    child: Text(
-                      'Recommendations will appear as local collections are added.',
-                    ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        height: 300,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: store.cities.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 14),
+                          itemBuilder: (context, index) => _DestinationCard(
+                            city: store.cities[index],
+                            rank: index + 1,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      const GeoSectionHeader(title: 'Recommended for you'),
+                      const SizedBox(height: 10),
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: recommendations.length,
+                            gridDelegate:
+                                SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 230,
+                                  mainAxisExtent: 252,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                ),
+                            itemBuilder: (context, index) => _PlaceCard(
+                              poi: recommendations[index],
+                              tag: index == 0
+                                  ? 'FOR YOU'
+                                  : index == 1
+                                  ? 'QUIET FIND'
+                                  : 'LOCAL PICK',
+                            ),
+                          );
+                        },
+                      ),
+                      if (recommendations.isEmpty)
+                        const GeoGlassCard(
+                          child: Text(
+                            'Recommendations will appear as local collections are added.',
+                          ),
+                        ),
+                    ],
                   ),
+                ),
               ],
             ),
           ),
@@ -95,78 +127,84 @@ class _HomeState extends State<Home> {
   }
 }
 
-class _ExploreHero extends StatelessWidget {
+class _ExploreHeader extends StatelessWidget {
   final TravelStore store;
   final VoidCallback onSearch;
 
-  const _ExploreHero({required this.store, required this.onSearch});
+  const _ExploreHeader({required this.store, required this.onSearch});
 
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).extension<AppCommon>()!;
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 760;
-        final copy = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              store.isLocating
-                  ? 'Finding your location…'
-                  : '${store.userLocation.city}, ${store.userLocation.country}',
-              style: Theme.of(
-                context,
-              ).textTheme.labelMedium?.copyWith(color: tokens.brand),
-            ),
-            const SizedBox(height: 5),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Explore',
-                    style: Theme.of(context).textTheme.displayLarge,
-                  ),
-                ),
-                OutlinedButton.icon(
-                  onPressed: onSearch,
-                  icon: const Icon(Icons.search, size: 17),
-                  label: const Text('Search'),
-                ),
-              ],
-            ),
-          ],
-        );
-
-        final globe = SizedBox(
-          height: wide ? 300 : 245,
-          child: Center(
-            child: TravelEarthGlobeView(
-              width: wide ? 300 : double.infinity,
-              height: wide ? 300 : 245,
-              backgroundSize: Size.infinite,
-              globeAlignment: Alignment.center,
-              showBackground: false,
-              cities: store.cities,
-              userLocation: store.userLocation,
-              onCityTap: (city) => context.push('/explore/city/${city.id}'),
-              autoRotate: true,
-              rotationSpeed: 0.025,
-            ),
+    return Material(
+      type: MaterialType.transparency,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            store.isLocating
+                ? 'Finding your location…'
+                : '${store.userLocation.city}, ${store.userLocation.country}',
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(color: tokens.brand),
           ),
-        );
-
-        if (wide) {
-          return Row(
+          const SizedBox(height: 5),
+          Row(
             children: [
-              Expanded(child: copy),
-              const SizedBox(width: 28),
-              SizedBox(width: 340, child: globe),
+              Expanded(
+                child: Text(
+                  'Explore',
+                  style: Theme.of(context).textTheme.displayLarge,
+                ),
+              ),
+              OutlinedButton.icon(
+                onPressed: onSearch,
+                icon: const Icon(Icons.search, size: 17),
+                label: const Text('Search'),
+              ),
             ],
-          );
-        }
-        return Column(children: [copy, const SizedBox(height: 4), globe]);
-      },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExploreGlobe extends StatelessWidget {
+  final TravelStore store;
+  final ValueChanged<bool> onInteractionChanged;
+
+  const _ExploreGlobe({
+    required this.store,
+    required this.onInteractionChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 400,
+      child: Center(
+        child: TravelEarthGlobeView(
+          width: double.infinity,
+          height: 400,
+          globeAlignment: Alignment.center,
+          sphereAlignment: Alignment.center,
+          showBackground: true,
+          cities: store.cities,
+          userLocation: store.userLocation,
+          autoRotate: true,
+          rotationSpeed: 0.025,
+          zoomEnabled: false,
+          onInteractionChanged: onInteractionChanged,
+          dayNightCycleEnabled: false,
+          surfaceLightingEnabled: false,
+          lightIntensity: 0,
+          ambientLight: 1,
+        ),
+      ),
     );
   }
 }
@@ -190,7 +228,7 @@ class _DestinationCard extends StatelessWidget {
           seed: city.heroImageRef,
           borderRadius: BorderRadius.circular(22),
           child: Padding(
-            padding: const EdgeInsets.all(17),
+            padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

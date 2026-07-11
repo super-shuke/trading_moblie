@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traveling_app/component/travel/geo_surface.dart';
 import 'package:traveling_app/route/bottomRoute/index.dart';
 import 'package:traveling_app/route/routers.dart';
 
@@ -64,11 +65,15 @@ CustomTransitionPage<T> buildPageWithAnimation<T>({
   PageTransition transition = PageTransition.slideRight,
   // 转场时长。
   Duration duration = const Duration(milliseconds: 200),
+  // 是否由当前路由独立承载星空背景。
+  bool includeBackground = true,
 }) {
   return CustomTransitionPage(
     key: key,
-    child: child,
+    child: includeBackground ? GeoStarfieldBackground(child: child) : child,
+    opaque: true,
     transitionDuration: duration,
+    reverseTransitionDuration: duration,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       if (transition == PageTransition.fade) {
         return _buildFadeTransition(animation, secondaryAnimation, child);
@@ -95,7 +100,9 @@ final GoRouter mainRouter = GoRouter(
     // 全部路由配置。
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
-        return ScaffoldWithNavBar(navigationShell: navigationShell);
+        return GeoStarfieldBackground(
+          child: ScaffoldWithNavBar(navigationShell: navigationShell),
+        );
       },
       branches: [
         ...tabRoutes.map(
@@ -113,6 +120,7 @@ final GoRouter mainRouter = GoRouter(
                     key: state.pageKey,
                     child: builder(context, state),
                     transition: PageTransition.fade,
+                    includeBackground: false,
                   );
                 },
               ),

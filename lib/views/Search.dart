@@ -82,47 +82,24 @@ class _TravelSearchViewState extends State<TravelSearchView> {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: TextField(
+                      child: TravelTextField(
                         key: const ValueKey('travel-search-field'),
                         controller: _controller,
                         focusNode: _focusNode,
                         textInputAction: TextInputAction.search,
                         onChanged: (value) => setState(() => _query = value),
-                        decoration: InputDecoration(
-                          hintText: 'Search cities, places, shops…',
-                          prefixIcon: const Icon(Icons.search, size: 20),
-                          suffixIcon: _query.isEmpty
-                              ? null
-                              : IconButton(
-                                  tooltip: 'Clear search',
-                                  onPressed: () {
-                                    _controller.clear();
-                                    setState(() => _query = '');
-                                  },
-                                  icon: const Icon(Icons.close, size: 19),
-                                ),
-                          filled: true,
-                          fillColor: tokens.surface.withValues(alpha: 0.82),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 15,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide(color: tokens.border),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide(color: tokens.border),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide(
-                              color: tokens.brand,
-                              width: 1.4,
-                            ),
-                          ),
-                        ),
+                        hintText: 'Search cities, places, shops…',
+                        prefixIcon: const Icon(Icons.search, size: 20),
+                        suffixIcon: _query.isEmpty
+                            ? null
+                            : IconButton(
+                                tooltip: 'Clear search',
+                                onPressed: () {
+                                  _controller.clear();
+                                  setState(() => _query = '');
+                                },
+                                icon: const Icon(Icons.close, size: 19),
+                              ),
                       ),
                     ),
                   ],

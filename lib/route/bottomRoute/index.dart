@@ -24,6 +24,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
         final useRail = constraints.maxWidth >= 900;
         if (useRail) {
           return Scaffold(
+            backgroundColor: Colors.transparent,
             body: Row(
               children: [
                 SafeArea(
@@ -42,6 +43,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
         }
 
         return Scaffold(
+          backgroundColor: Colors.transparent,
           extendBody: true,
           body: navigationShell,
           bottomNavigationBar: SafeArea(

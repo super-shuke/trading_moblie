@@ -57,13 +57,19 @@ class TravelEarthGlobeView extends StatefulWidget {
   /// 用户当前位置（特殊样式：金色，更大）。
   final UserLocation userLocation;
 
-  /// 城市 marker 点击回调。当为 null 时禁用 marker 点击 + 禁用缩放。
+  /// 城市 marker 点击回调。当为 null 时禁用 marker 点击。
   final void Function(City city)? onCityTap;
 
   /// 是否允许用户手势操作地球。
   ///
   /// 关闭后会屏蔽拖拽、缩放以及 marker 点击，适合登录页这类装饰地球。
   final bool gesturesEnabled;
+
+  /// 是否允许双指、滚轮或触控板缩放，不影响拖动旋转和 marker 点击。
+  final bool zoomEnabled;
+
+  /// 地球区域内有指针按下或全部释放时通知外层，可用于暂停父级滚动。
+  final ValueChanged<bool>? onInteractionChanged;
 
   // ─── 行为 ───────────────────────────────────────────
 
@@ -156,6 +162,8 @@ class TravelEarthGlobeView extends StatefulWidget {
     required this.userLocation,
     this.onCityTap,
     this.gesturesEnabled = true,
+    this.zoomEnabled = true,
+    this.onInteractionChanged,
     this.autoRotate = true,
     this.rotationSpeed = 0.08,
     this.maxMarkers = 18,
@@ -195,6 +203,7 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
   /// 标记是否已经把 cities/userLocation 同步到控制器了。
   /// 防止 didChangeDependencies 在初次渲染时被多次调用导致重复添加。
   bool _didSyncPoints = false;
+  final Set<int> _activePointers = <int>{};
 
   @override
   void initState() {
@@ -215,7 +224,7 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
       zoom: widget.zoom,
       minZoom: -0.45,
       maxZoom: 0.9,
-      isZoomEnabled: widget.gesturesEnabled,
+      isZoomEnabled: widget.gesturesEnabled && widget.zoomEnabled,
       panSensitivity: 0.62,
       minLatitude: widget.minLatitude,
       maxLatitude: widget.maxLatitude,
@@ -272,8 +281,9 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
       _syncPoints();
     }
 
-    if (oldWidget.gesturesEnabled != widget.gesturesEnabled) {
-      _controller.isZoomEnabled = widget.gesturesEnabled;
+    if (oldWidget.gesturesEnabled != widget.gesturesEnabled ||
+        oldWidget.zoomEnabled != widget.zoomEnabled) {
+      _controller.isZoomEnabled = widget.gesturesEnabled && widget.zoomEnabled;
     }
 
     // 旋转相关属性变化时，重新启动/停止旋转。
@@ -289,6 +299,13 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
 
   @override
   void dispose() {
+    if (_activePointers.isNotEmpty) {
+      final onInteractionChanged = widget.onInteractionChanged;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onInteractionChanged?.call(false);
+      });
+      _activePointers.clear();
+    }
     // ⚠️ 注意：当前没有 _controller.dispose()，
     // 如果 FlutterEarthGlobeController 有 dispose 方法，应该在这里调用以释放资源。
     super.dispose();
@@ -296,12 +313,14 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
 
   @override
   Widget build(BuildContext context) {
+    final Widget viewport;
+
     // 模式 A：设了 backgroundSize → 把球放到一个更大的"舞台"里
     //
     // 适合场景：球只想占屏幕一部分，但要在更大区域内做对齐
     // 例如：500x800 的容器里，球只有 340x340，居上 Alignment(0, -0.5)
     if (widget.backgroundSize != null) {
-      return LayoutBuilder(
+      viewport = LayoutBuilder(
         builder: (context, constraints) {
           // 计算实际舞台尺寸：如果 backgroundSize 是有限值就用它，否则填满父容器
           final viewport = Size(
@@ -323,10 +342,41 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
           );
         },
       );
+    } else {
+      // 模式 B：默认 → 球占据整个 width × height 区域
+      viewport = SizedBox(
+        width: _globeWidth,
+        height: _globeHeight,
+        child: _globe(),
+      );
     }
 
-    // 模式 B：默认 → 球占据整个 width × height 区域
-    return SizedBox(width: _globeWidth, height: _globeHeight, child: _globe());
+    if (!widget.gesturesEnabled || widget.onInteractionChanged == null) {
+      return viewport;
+    }
+
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: _handlePointerDown,
+      onPointerUp: _handlePointerEnd,
+      onPointerCancel: _handlePointerEnd,
+      child: viewport,
+    );
+  }
+
+  void _handlePointerDown(PointerDownEvent event) {
+    final wasIdle = _activePointers.isEmpty;
+    _activePointers.add(event.pointer);
+    if (wasIdle) {
+      widget.onInteractionChanged?.call(true);
+    }
+  }
+
+  void _handlePointerEnd(PointerEvent event) {
+    _activePointers.remove(event.pointer);
+    if (_activePointers.isEmpty) {
+      widget.onInteractionChanged?.call(false);
+    }
   }
 
   /// 渲染地球本身。
@@ -358,7 +408,7 @@ class _TravelEarthGlobeViewState extends State<TravelEarthGlobeView> {
       width: _globeWidth,
       height: _globeHeight,
       child: OverflowBox(
-        alignment: Alignment.topCenter,
+        alignment: Alignment.center,
         minWidth: canvasWidth,
         maxWidth: canvasWidth,
         minHeight: canvasHeight,
