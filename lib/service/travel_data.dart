@@ -142,6 +142,14 @@ class LocalPlace {
 enum TipKind { positive, neutral, avoid }
 
 @immutable
+class TipImage {
+  final Uint8List bytes;
+  final String name;
+
+  const TipImage({required this.bytes, required this.name});
+}
+
+@immutable
 class Tip {
   final String id;
   final String poiId;
@@ -150,6 +158,9 @@ class Tip {
   final String body;
   final DateTime createdAt;
   final int likes;
+  final int dislikes;
+  final List<TipImage> images;
+  final List<Tip> children;
 
   const Tip({
     required this.id,
@@ -159,7 +170,25 @@ class Tip {
     required this.body,
     required this.createdAt,
     required this.likes,
+    this.dislikes = 0,
+    this.images = const [],
+    this.children = const [],
   });
+
+  Tip copyWith({int? likes, int? dislikes, List<Tip>? children}) {
+    return Tip(
+      id: id,
+      poiId: poiId,
+      authorName: authorName,
+      kind: kind,
+      body: body,
+      createdAt: createdAt,
+      likes: likes ?? this.likes,
+      dislikes: dislikes ?? this.dislikes,
+      images: images,
+      children: children ?? this.children,
+    );
+  }
 }
 
 @immutable
@@ -736,6 +765,17 @@ class TravelMockData {
                 'Bring a blanket. The stone benches get cold once the sun is down.',
             createdAt: base.subtract(const Duration(days: 4)),
             likes: 87,
+            children: [
+              Tip(
+                id: 't1_reply_1',
+                poiId: poiId,
+                authorName: 'Nina',
+                kind: TipKind.neutral,
+                body: 'Good call. It gets windy even on warm evenings.',
+                createdAt: base.subtract(const Duration(days: 3)),
+                likes: 12,
+              ),
+            ],
           ),
           Tip(
             id: 't2',

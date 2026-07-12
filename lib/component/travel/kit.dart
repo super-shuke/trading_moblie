@@ -3,6 +3,48 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:traveling_app/service/travel_data.dart';
 import 'package:traveling_app/styles/theme/app_common.dart';
 
+/// 详情页统一的全宽主操作按钮。
+class TravelPrimaryActionButton extends StatelessWidget {
+  final VoidCallback? onPressed;
+  final IconData icon;
+  final String label;
+  final bool light;
+
+  const TravelPrimaryActionButton({
+    super.key,
+    required this.onPressed,
+    required this.icon,
+    required this.label,
+    this.light = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).extension<AppCommon>()!;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: double.infinity),
+        child: SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: FilledButton.icon(
+            onPressed: onPressed,
+            icon: Icon(icon),
+            label: Text(label),
+            style: FilledButton.styleFrom(
+              elevation: 6,
+              backgroundColor: light ? tokens.surfaceElevated : null,
+              foregroundColor: light ? tokens.textPrimary : null,
+              side: light ? BorderSide(color: tokens.border) : null,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// 应用统一输入框。
 ///
 /// 集中管理输入文字、提示文字、填充背景、边框、聚焦态和禁用态样式，
@@ -81,14 +123,14 @@ class TravelTextField extends StatelessWidget {
       onSubmitted: onSubmitted,
       onTap: onTap,
       cursorColor: tokens.brand,
-      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-        color: tokens.textPrimary,
-      ),
+      style: Theme.of(
+        context,
+      ).textTheme.bodyLarge?.copyWith(color: tokens.textPrimary),
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: tokens.textMuted,
-        ),
+        hintStyle: Theme.of(
+          context,
+        ).textTheme.bodyMedium?.copyWith(color: tokens.textMuted),
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
         prefixIconColor: tokens.textSecondary,
@@ -112,9 +154,7 @@ class TravelTextField extends StatelessWidget {
         border: border,
         enabledBorder: border,
         disabledBorder: border.copyWith(
-          borderSide: BorderSide(
-            color: tokens.border.withValues(alpha: 0.5),
-          ),
+          borderSide: BorderSide(color: tokens.border.withValues(alpha: 0.5)),
         ),
         focusedBorder: border.copyWith(
           borderSide: BorderSide(color: tokens.brand, width: 1.5),
@@ -191,6 +231,70 @@ class TravelLocationIcon extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// 详情页通用的可展开粘性导航栏。
+///
+/// 收起到工具栏附近时显示居中标题，页面可自定义标题、操作区和展开内容。
+class TravelDetailSliverAppBar extends StatelessWidget {
+  /// 导航栏接近完全收起时淡入显示的居中标题。
+  final Widget collapsedTitle;
+
+  /// 导航栏展开区域的内容，通常传入带背景图片的 [FlexibleSpaceBar]。
+  final Widget flexibleSpace;
+
+  /// 导航栏左侧组件，通常用于放置返回按钮。
+  final Widget? leading;
+
+  /// 导航栏右侧操作组件，例如收藏或分享按钮。
+  final List<Widget>? actions;
+
+  /// 导航栏完全展开时的高度，默认为 330 逻辑像素。
+  final double expandedHeight;
+
+  /// 标题相对完全收起位置提前显示的距离；数值越大，标题出现得越早。
+  final double titleRevealOffset;
+
+  const TravelDetailSliverAppBar({
+    super.key,
+    required this.collapsedTitle,
+    required this.flexibleSpace,
+    this.leading,
+    this.actions,
+    this.expandedHeight = 330,
+    this.titleRevealOffset = 72,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).extension<AppCommon>()!;
+    return SliverAppBar(
+      pinned: true,
+      expandedHeight: expandedHeight,
+      backgroundColor: tokens.background.withValues(alpha: 0.9),
+      surfaceTintColor: Colors.transparent,
+      title: Builder(
+        builder: (context) {
+          final settings = context
+              .dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>();
+          final showTitle =
+              settings != null &&
+              settings.currentExtent <= settings.minExtent + titleRevealOffset;
+
+          return AnimatedOpacity(
+            opacity: showTitle ? 1 : 0,
+            duration: const Duration(milliseconds: 160),
+            child: collapsedTitle,
+          );
+        },
+      ),
+      centerTitle: true,
+      titleTextStyle: Theme.of(context).textTheme.titleLarge,
+      leading: leading,
+      actions: actions,
+      flexibleSpace: flexibleSpace,
     );
   }
 }

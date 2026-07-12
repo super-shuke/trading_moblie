@@ -62,6 +62,9 @@ class TravelStore extends ChangeNotifier {
   final Set<String> _completedStopIds = <String>{};
   final List<TravelRecord> _travelRecords = <TravelRecord>[];
   final List<PlannedTrip> _plannedTrips = <PlannedTrip>[];
+  final Map<String, List<Tip>> _tipsByPoi = <String, List<Tip>>{};
+  final Set<String> _likedTipIds = <String>{};
+  final Set<String> _dislikedTipIds = <String>{};
   bool _isLocating = false;
   bool _hasRequestedLocation = false;
   String? _locationError;
@@ -113,7 +116,146 @@ class TravelStore extends ChangeNotifier {
   Poi? poiById(String id) => TravelMockData.poiById(id);
 
   /// 返回某个 POI 的用户 tips。
-  List<Tip> tipsForPoi(String poiId) => TravelMockData.tipsForPoi(poiId);
+  List<Tip> tipsForPoi(String poiId) => List.unmodifiable(
+    _tipsByPoi.putIfAbsent(poiId, () => TravelMockData.tipsForPoi(poiId)),
+  );
+
+  bool isTipLiked(String tipId) => _likedTipIds.contains(tipId);
+
+  bool isTipDisliked(String tipId) => _dislikedTipIds.contains(tipId);
+
+  bool canDeleteTip(Tip tip) => tip.authorName == _profile.name;
+
+  void addTip(Tip tip) {
+    final tips = _tipsByPoi.putIfAbsent(
+      tip.poiId,
+      () => TravelMockData.tipsForPoi(tip.poiId),
+    );
+    tips.insert(0, tip);
+    notifyListeners();
+  }
+
+  void addTipReply({required String parentTipId, required Tip reply}) {
+    final tips = _tipsByPoi.putIfAbsent(
+      reply.poiId,
+      () => TravelMockData.tipsForPoi(reply.poiId),
+    );
+    _tipsByPoi[reply.poiId] = _updateTip(
+      tips,
+      parentTipId,
+      (tip) => tip.copyWith(children: [...tip.children, reply]),
+    );
+    notifyListeners();
+  }
+
+  bool deleteTip(String poiId, String tipId) {
+    final tips = _tipsByPoi.putIfAbsent(
+      poiId,
+      () => TravelMockData.tipsForPoi(poiId),
+    );
+    final tip = _findTip(tips, tipId);
+    if (tip == null || !canDeleteTip(tip)) {
+      return false;
+    }
+
+    _tipsByPoi[poiId] = _removeTip(tips, tipId);
+    _likedTipIds.remove(tipId);
+    _dislikedTipIds.remove(tipId);
+    notifyListeners();
+    return true;
+  }
+
+  void toggleTipLike(String poiId, String tipId) {
+    final wasLiked = _likedTipIds.remove(tipId);
+    final wasDisliked = _dislikedTipIds.remove(tipId);
+    if (!wasLiked) {
+      _likedTipIds.add(tipId);
+    }
+    _updateTipReaction(
+      poiId,
+      tipId,
+      likeDelta: wasLiked ? -1 : 1,
+      dislikeDelta: wasDisliked ? -1 : 0,
+    );
+  }
+
+  void toggleTipDislike(String poiId, String tipId) {
+    final wasDisliked = _dislikedTipIds.remove(tipId);
+    final wasLiked = _likedTipIds.remove(tipId);
+    if (!wasDisliked) {
+      _dislikedTipIds.add(tipId);
+    }
+    _updateTipReaction(
+      poiId,
+      tipId,
+      likeDelta: wasLiked ? -1 : 0,
+      dislikeDelta: wasDisliked ? -1 : 1,
+    );
+  }
+
+  void _updateTipReaction(
+    String poiId,
+    String tipId, {
+    required int likeDelta,
+    required int dislikeDelta,
+  }) {
+    final tips = _tipsByPoi.putIfAbsent(
+      poiId,
+      () => TravelMockData.tipsForPoi(poiId),
+    );
+    _tipsByPoi[poiId] = _updateTip(
+      tips,
+      tipId,
+      (tip) => tip.copyWith(
+        likes: (tip.likes + likeDelta).clamp(0, 1 << 31),
+        dislikes: (tip.dislikes + dislikeDelta).clamp(0, 1 << 31),
+      ),
+    );
+    notifyListeners();
+  }
+
+  List<Tip> _updateTip(
+    List<Tip> tips,
+    String tipId,
+    Tip Function(Tip tip) update,
+  ) {
+    return tips.map((tip) {
+      if (tip.id == tipId) {
+        return update(tip);
+      }
+      final children = _updateTip(tip.children, tipId, update);
+      return identical(children, tip.children)
+          ? tip
+          : tip.copyWith(children: children);
+    }).toList();
+  }
+
+  Tip? _findTip(List<Tip> tips, String tipId) {
+    for (final tip in tips) {
+      if (tip.id == tipId) {
+        return tip;
+      }
+      final child = _findTip(tip.children, tipId);
+      if (child != null) {
+        return child;
+      }
+    }
+    return null;
+  }
+
+  List<Tip> _removeTip(List<Tip> tips, String tipId) {
+    final result = <Tip>[];
+    for (final tip in tips) {
+      if (tip.id == tipId) {
+        result.addAll(tip.children);
+      } else {
+        result.add(
+          tip.copyWith(children: _removeTip(tip.children, tipId)),
+        );
+      }
+    }
+    return result;
+  }
 
   /// 请求系统定位权限并刷新当前坐标。
   Future<void> requestUserLocation() async {

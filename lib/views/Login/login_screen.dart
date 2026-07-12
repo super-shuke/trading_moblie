@@ -87,83 +87,90 @@ class _LoginScreenState extends State<LoginScreen> {
               builder: (context, constraints) {
                 final isWide = constraints.maxWidth >= 920;
                 final horizontalPadding = isWide ? 40.0 : 24.0;
-                final globeWidth = isWide ? 420.0 : double.infinity;
-                final globeHeight = isWide ? 400.0 : 400.0;
+                final globeWidth = isWide ? 420.0 : constraints.maxWidth;
+                const globeHeight = 400.0;
 
-                return Stack(
-                  fit: StackFit.expand,
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned.fill(
-                      child: TravelEarthGlobeView(
-                        width: globeWidth,
-                        height: globeHeight,
-                        backgroundSize: Size.infinite,
-                        globeAlignment: const Alignment(0, -0.65),
-                        showBackground: false,
-                        cities: travelStore.cities.take(6).toList(),
-                        userLocation: travelStore.userLocation,
-                        rotationSpeed: 0.02,
-                        maxMarkers: 6,
+                return ScrollConfiguration(
+                  behavior: ScrollConfiguration.of(context).copyWith(
+                    overscroll: false,
+                    physics: const BouncingScrollPhysics(),
+                  ),
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: SizedBox(height: isWide ? 30 : 24),
                       ),
-                    ),
-                    Positioned(
-                      top: 30,
-                      left: 30,
-                      right: 0,
-                      child: TravelLocationIcon(
-                        location: travelStore.userLocation.city,
-                      ),
-                    ),
-                    ScrollConfiguration(
-                      behavior: ScrollConfiguration.of(context).copyWith(
-                        scrollbars: false,
-                        overscroll: false,
-                        physics: const BouncingScrollPhysics(),
-                      ),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            SizedBox(height: 360),
-                            Padding(
-                              padding: EdgeInsets.fromLTRB(
-                                horizontalPadding,
-                                24,
-                                horizontalPadding,
-                                24,
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _LoginHero(
-                                    tokens: tokens,
-                                    titleStyle: titleStyle,
-                                    bodyStyle: bodyStyle,
-                                    compact: true,
-                                  ),
-                                  const SizedBox(height: 30),
-                                  _LoginCard(
-                                    tokens: tokens,
-                                    isSigningIn: _isSigningIn,
-                                    errorMessage: _errorMessage,
-                                    onPreviewGlobeDemo: () {
-                                      context.push('/globe-demo');
-                                    },
-                                    onGoogleSignIn: _signInWithGoogle,
-                                    onContinueAsGuest: () {
-                                      UserStoreScope.of(context).login('Guest');
-                                      context.go('/explore');
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                      SliverAppBar(
+                        pinned: true,
+                        primary: false,
+                        automaticallyImplyLeading: false,
+                        backgroundColor: Colors.transparent,
+                        surfaceTintColor: tokens.background.withValues(
+                          alpha: 0.94,
+                        ),
+                        scrolledUnderElevation: 2,
+                        titleSpacing: horizontalPadding,
+                        title: TravelLocationIcon(
+                          location: travelStore.userLocation.city,
                         ),
                       ),
-                    ),
-                  ],
+                      const SliverToBoxAdapter(child: SizedBox(height: 12)),
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: globeHeight,
+                          child: Center(
+                            child: TravelEarthGlobeView(
+                              width: globeWidth,
+                              height: globeHeight,
+                              zoomEnabled: false,
+                              sphereAlignment: Alignment.center,
+                              showBackground: false,
+                              cities: travelStore.cities.take(6).toList(),
+                              userLocation: travelStore.userLocation,
+                              rotationSpeed: 0.02,
+                              maxMarkers: 6,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SliverPadding(
+                        padding: EdgeInsets.fromLTRB(
+                          horizontalPadding,
+                          24,
+                          horizontalPadding,
+                          24,
+                        ),
+                        sliver: SliverToBoxAdapter(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _LoginHero(
+                                tokens: tokens,
+                                titleStyle: titleStyle,
+                                bodyStyle: bodyStyle,
+                                compact: true,
+                              ),
+                              const SizedBox(height: 30),
+                              _LoginCard(
+                                tokens: tokens,
+                                isSigningIn: _isSigningIn,
+                                errorMessage: _errorMessage,
+                                onPreviewGlobeDemo: () {
+                                  context.push('/globe-demo');
+                                },
+                                onGoogleSignIn: _signInWithGoogle,
+                                onContinueAsGuest: () {
+                                  UserStoreScope.of(context).login('Guest');
+                                  context.go('/explore');
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -328,8 +335,8 @@ class _LoginCard extends StatelessWidget {
             ],
           ),
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 16),
-            height: 14,
+            margin: const EdgeInsets.symmetric(vertical: 12),
+            height: 18,
             width: double.infinity,
             alignment: Alignment.center,
             child: Text(
@@ -340,15 +347,6 @@ class _LoginCard extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 height: 1.4,
               ),
-            ),
-          ),
-          SizedBox(
-            width: double.infinity,
-            height: 42,
-            child: TextButton.icon(
-              onPressed: onPreviewGlobeDemo,
-              icon: const Icon(Icons.public, size: 18),
-              label: const Text('Preview globe demo'),
             ),
           ),
           if (errorMessage != null) ...[

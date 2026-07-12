@@ -17,6 +17,9 @@ class PageContent extends StatelessWidget {
   /// 悬浮按钮
   final Widget? floatingActionButton;
 
+  /// 悬浮按钮在页面中的位置。
+  final FloatingActionButtonLocation? floatingActionButtonLocation;
+
   /// 页面名称（用于默认 AppBar 标题）
   final String? pageName;
 
@@ -44,6 +47,7 @@ class PageContent extends StatelessWidget {
     required this.body,
     this.bottomNavigation,
     this.floatingActionButton,
+    this.floatingActionButtonLocation,
     this.pageName,
     this.useSafeArea = true,
     this.safeAreaTop = true,
@@ -89,6 +93,7 @@ class PageContent extends StatelessWidget {
       body: content,
       bottomNavigationBar: bottomNavigation,
       floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: floatingActionButtonLocation,
     );
   }
 
@@ -129,6 +134,7 @@ class PageContent extends StatelessWidget {
       ),
       bottomNavigationBar: bottomNavigation,
       floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: floatingActionButtonLocation,
     );
   }
 }

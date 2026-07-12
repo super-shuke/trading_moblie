@@ -85,6 +85,9 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp.router(
             onGenerateTitle: (context) => 'GeoTravel',
             routerConfig: mainRouter,
+            scrollBehavior: const MaterialScrollBehavior().copyWith(
+              scrollbars: false,
+            ),
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
             themeMode: _commonStore.themeMode,

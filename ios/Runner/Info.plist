@@ -30,6 +30,8 @@
 	<string>We use your location in the background to support continuous travel guidance when you choose always-on access.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We use your location to show nearby places and personalize the travel map.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We use your photo library so you can attach travel photos to your notes.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -41,11 +41,9 @@ class _CityDetailsState extends State<CityDetails> {
       backgroundColor: Colors.transparent,
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            pinned: true,
+          TravelDetailSliverAppBar(
             expandedHeight: 330,
-            backgroundColor: tokens.background.withValues(alpha: 0.9),
-            surfaceTintColor: Colors.transparent,
+            collapsedTitle: Text(city.name),
             leading: IconButton.filledTonal(
               onPressed: () =>
                   context.canPop() ? context.pop() : context.go('/explore'),
@@ -183,15 +181,12 @@ class _CityDetailsState extends State<CityDetails> {
           const SliverPadding(padding: EdgeInsets.only(bottom: 120)),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-        child: SizedBox(
-          height: 54,
-          child: ElevatedButton(
-            onPressed: () => context.go('/itinerary'),
-            child: Text('Plan a trip to ${city.name}'),
-          ),
-        ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: TravelPrimaryActionButton(
+        onPressed: () => context.go('/itinerary'),
+        icon: Icons.route_outlined,
+        label: 'Plan a trip to ${city.name}',
+        light: true,
       ),
     );
   }

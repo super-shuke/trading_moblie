@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:traveling_app/component/common/bubble/index.dart';
 import 'package:traveling_app/component/travel/geo_surface.dart';
 import 'package:traveling_app/component/travel/kit.dart';
+import 'package:traveling_app/component/travel/review_composer.dart';
+import 'package:traveling_app/service/travel_data.dart';
 import 'package:traveling_app/store/travel/travel_store.dart';
 import 'package:traveling_app/styles/theme/app_common.dart';
 
@@ -16,14 +19,6 @@ class PoiDetails extends StatefulWidget {
 }
 
 class _PoiDetailsState extends State<PoiDetails> {
-  final _noteController = TextEditingController();
-
-  @override
-  void dispose() {
-    _noteController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).extension<AppCommon>()!;
@@ -49,10 +44,10 @@ class _PoiDetailsState extends State<PoiDetails> {
       backgroundColor: Colors.transparent,
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            pinned: true,
+          TravelDetailSliverAppBar(
             expandedHeight: 350,
-            backgroundColor: tokens.background.withValues(alpha: 0.9),
+
+            collapsedTitle: Text(poi.name),
             leading: IconButton.filledTonal(
               onPressed: () => context.canPop()
                   ? context.pop()
@@ -223,36 +218,61 @@ class _PoiDetailsState extends State<PoiDetails> {
                               tip.authorName,
                               style: TextStyle(color: tokens.brand),
                             ),
-                            const SizedBox(height: 7),
-                            Text(tip.body),
+                            if (tip.body.isNotEmpty) ...[
+                              const SizedBox(height: 7),
+                              Text(tip.body),
+                            ],
+                            if (tip.images.isNotEmpty) ...[
+                              const SizedBox(height: 10),
+                              SizedBox(
+                                height: 120,
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: tip.images.length,
+                                  separatorBuilder: (_, __) =>
+                                      const SizedBox(width: 8),
+                                  itemBuilder: (context, index) {
+                                    final image = tip.images[index];
+                                    return ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.memory(
+                                        image.bytes,
+                                        width: 150,
+                                        height: 120,
+                                        fit: BoxFit.cover,
+                                        semanticLabel: image.name,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
                       const SizedBox(height: 10),
                     ],
                     const SizedBox(height: 8),
-                    TravelTextField(
-                      controller: _noteController,
-                      minLines: 2,
-                      maxLines: 4,
-                      hintText: 'Share a useful, non-promotional note',
-                    ),
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: FilledButton.tonalIcon(
-                        onPressed: () {
-                          if (_noteController.text.trim().isEmpty) return;
-                          _noteController.clear();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Your note is ready for review.'),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.send_outlined, size: 17),
-                        label: const Text('Post note'),
-                      ),
+                    TravelReviewComposer(
+                      title: 'Write a review',
+                      onSubmit: (body, images) {
+                        store.addTip(
+                          Tip(
+                            id: 'tip_${DateTime.now().microsecondsSinceEpoch}',
+                            poiId: poi.id,
+                            authorName: store.profile.name,
+                            kind: TipKind.neutral,
+                            body: body,
+                            createdAt: DateTime.now(),
+                            likes: 0,
+                            images: images,
+                          ),
+                        );
+                        TravelBubble.show(
+                          context,
+                          message: 'Your review was posted.',
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -261,30 +281,25 @@ class _PoiDetailsState extends State<PoiDetails> {
           ),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-        child: SizedBox(
-          height: 54,
-          child: ElevatedButton(
-            onPressed: inTrip
-                ? () => context.go('/itinerary')
-                : () {
-                    store.addPoiToItinerary(poi.id);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '${poi.name} added to ${store.itinerary.title}',
-                        ),
-                      ),
-                    );
-                  },
-            child: Text(
-              inTrip
-                  ? 'View in ${store.itinerary.title}'
-                  : 'Add to ${store.itinerary.title}',
-            ),
-          ),
-        ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: TravelPrimaryActionButton(
+        onPressed: inTrip
+            ? () => context.go('/itinerary')
+            : () {
+                store.addPoiToItinerary(poi.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      '${poi.name} added to ${store.itinerary.title}',
+                    ),
+                  ),
+                );
+              },
+        icon: inTrip ? Icons.map_outlined : Icons.add_location_alt_outlined,
+        label: inTrip
+            ? 'View in ${store.itinerary.title}'
+            : 'Add to ${store.itinerary.title}',
+        light: true,
       ),
     );
   }

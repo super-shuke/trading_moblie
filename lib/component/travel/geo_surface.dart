@@ -88,6 +88,12 @@ class GeoGlassCard extends StatelessWidget {
   final Color? color;
   final VoidCallback? onTap;
 
+  /// 卡片宽度，默认撑满父级可用宽度。
+  final double width;
+
+  /// 卡片最小高度，内容较多时仍可继续向下扩展。
+  final double minHeight;
+
   const GeoGlassCard({
     super.key,
     required this.child,
@@ -95,33 +101,43 @@ class GeoGlassCard extends StatelessWidget {
     this.borderRadius,
     this.color,
     this.onTap,
+    this.width = double.infinity,
+    this.minHeight = 80,
   });
 
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).extension<AppCommon>()!;
     final radius = borderRadius ?? BorderRadius.circular(18);
-    return ClipRRect(
-      borderRadius: radius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-        child: Material(
-          color: color ?? tokens.surface.withValues(alpha: 0.78),
-          shape: RoundedRectangleBorder(
+    final content = onTap == null
+        ? Padding(padding: padding, child: child)
+        : InkWell(
+            onTap: onTap,
             borderRadius: radius,
-            side: BorderSide(color: tokens.border.withValues(alpha: 0.85)),
+            splashFactory: InkRipple.splashFactory,
+            splashColor: tokens.brand.withValues(alpha: 0.18),
+            highlightColor: tokens.brand.withValues(alpha: 0.08),
+            child: Padding(padding: padding, child: child),
+          );
+
+    return SizedBox(
+      width: width,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: minHeight),
+        child: ClipRRect(
+          borderRadius: radius,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+            child: Material(
+              color: color ?? tokens.surface.withValues(alpha: 0.78),
+              shape: RoundedRectangleBorder(
+                borderRadius: radius,
+                side: BorderSide(color: tokens.border.withValues(alpha: 0.85)),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: content,
+            ),
           ),
-          clipBehavior: Clip.antiAlias,
-          child: onTap == null
-              ? Padding(padding: padding, child: child)
-              : InkWell(
-                  onTap: onTap,
-                  borderRadius: radius,
-                  splashFactory: InkRipple.splashFactory,
-                  splashColor: tokens.brand.withValues(alpha: 0.18),
-                  highlightColor: tokens.brand.withValues(alpha: 0.08),
-                  child: Padding(padding: padding, child: child),
-                ),
         ),
       ),
     );

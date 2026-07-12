@@ -49,6 +49,7 @@ dependencies:
   google_fonts: ^6.2.1
   flutter_earth_globe:
     path: packages/flutter_earth_globe
+  image_picker: ^1.2.3
 
 dev_dependencies:
   flutter_test:

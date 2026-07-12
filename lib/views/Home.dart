@@ -29,6 +29,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final store = TravelStoreScope.of(context);
+    final tokens = Theme.of(context).extension<AppCommon>()!;
     final recommendations = store.cities
         .expand((city) => store.poisForCity(city.id))
         .take(6)
@@ -41,84 +42,91 @@ class _HomeState extends State<Home> {
           bottom: false,
           child: GeoContent(
             padding: EdgeInsets.zero,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: _ExploreHeader(
-                    store: store,
-                    onSearch: _openSearch,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: ListView(
-                    physics: _isGlobeInteracting
-                        ? const NeverScrollableScrollPhysics()
-                        : null,
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 110),
-                    children: [
-                      _ExploreGlobe(
+            child: NestedScrollView(
+              physics: _isGlobeInteracting
+                  ? const NeverScrollableScrollPhysics()
+                  : null,
+              headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                PinnedHeaderSliver(
+                  child: ColoredBox(
+                    color: innerBoxIsScrolled
+                        ? tokens.background.withValues(alpha: 0.7)
+                        : Colors.transparent,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: _ExploreHeader(
                         store: store,
-                        onInteractionChanged: _handleGlobeInteractionChanged,
+                        onSearch: _openSearch,
                       ),
-                      const SizedBox(height: 22),
-                      GeoSectionHeader(
-                        title: 'Top destinations',
-                        actionLabel: 'See all',
-                        onAction: _openSearch,
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 300,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: store.cities.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(width: 14),
-                          itemBuilder: (context, index) => _DestinationCard(
-                            city: store.cities[index],
-                            rank: index + 1,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      const GeoSectionHeader(title: 'Recommended for you'),
-                      const SizedBox(height: 10),
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          return GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: recommendations.length,
-                            gridDelegate:
-                                SliverGridDelegateWithMaxCrossAxisExtent(
-                                  maxCrossAxisExtent: 230,
-                                  mainAxisExtent: 252,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                ),
-                            itemBuilder: (context, index) => _PlaceCard(
-                              poi: recommendations[index],
-                              tag: index == 0
-                                  ? 'FOR YOU'
-                                  : index == 1
-                                  ? 'QUIET FIND'
-                                  : 'LOCAL PICK',
-                            ),
-                          );
-                        },
-                      ),
-                      if (recommendations.isEmpty)
-                        const GeoGlassCard(
-                          child: Text(
-                            'Recommendations will appear as local collections are added.',
-                          ),
-                        ),
-                    ],
+                    ),
                   ),
                 ),
               ],
+              body: ListView(
+                physics: _isGlobeInteracting
+                    ? const NeverScrollableScrollPhysics()
+                    : null,
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 110),
+                children: [
+                  _ExploreGlobe(
+                    store: store,
+                    onInteractionChanged: _handleGlobeInteractionChanged,
+                  ),
+                  const SizedBox(height: 22),
+                  GeoSectionHeader(
+                    title: 'Top destinations',
+                    actionLabel: 'See all',
+                    onAction: _openSearch,
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 300,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: store.cities.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 14),
+                      itemBuilder: (context, index) => _DestinationCard(
+                        city: store.cities[index],
+                        rank: index + 1,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const GeoSectionHeader(title: 'Recommended for you'),
+                  const SizedBox(height: 10),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: recommendations.length,
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 230,
+                              mainAxisExtent: 252,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                            ),
+                        itemBuilder: (context, index) => _PlaceCard(
+                          poi: recommendations[index],
+                          tag: index == 0
+                              ? 'FOR YOU'
+                              : index == 1
+                              ? 'QUIET FIND'
+                              : 'LOCAL PICK',
+                        ),
+                      );
+                    },
+                  ),
+                  if (recommendations.isEmpty)
+                    const GeoGlassCard(
+                      child: Text(
+                        'Recommendations will appear as local collections are added.',
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

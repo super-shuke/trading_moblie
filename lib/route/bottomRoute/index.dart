@@ -107,7 +107,7 @@ class _FloatingNavigation extends StatelessWidget {
                           color: selected
                               ? tokens.brand.withValues(alpha: 0.2)
                               : Colors.transparent,
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(40),
                           border: Border.all(
                             color: selected
                                 ? tokens.brand.withValues(alpha: 0.38)
